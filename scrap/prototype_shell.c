@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 		 * It then calls (executor) if the command exists.
 		 * Should also handle ^C [EOT] and ^D [EOF]
 		 */
-		error_msg = "Error: Wrong usage.\n./p_sh [path/to/binary/file] [options_to_executable]\n";
+		error_msg = "Error: Wrong usage.\n./p_sh [/path/to/binary/file] [options_to_executable]\n";
 		write(STDERR_FILENO, error_msg, (sizeof(*error_msg) * strlen(error_msg)));
 	}
 	else
