@@ -25,6 +25,10 @@ typedef struct command_string_list
 
 unsigned long int _strlen(char *s);
 unsigned int _strspn(char *s, char *accept);
+int _getline(char **lineptr, int *n_c, int fd);
+char *_strtok(char *str, const char *delim);
+char *_memset(char *s, char c, unsigned int n);
+char *_strncpy(char *dest, char *src, int n);
 int executor(char **cmds);
 int parser(cmd_str *c_s, char **cmds[]);
 int cmd_fill(cmd_str *c_s, char **cmds[]);
