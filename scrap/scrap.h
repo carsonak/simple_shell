@@ -15,23 +15,24 @@
 /**
  * struct command_string_list - linked list of a command and it's options
  * @command: null terminated string
+ * @len: length of the command
  * @next: pointer to next node
  */
 typedef struct command_string_list
 {
 	char *command;
+	unsigned int len;
 	struct command_string_list *next;
 } cmd_str;
 
 unsigned long int _strlen(char *s);
 unsigned int _strspn(char *s, char *accept);
 int _getline(char **lineptr, int *n_c, int fd);
-char *_strtok(char *str, const char *delim);
+char *_strtok(char *str, char *delim);
 char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
+cmd_str *add_node_end(cmd_str **head, char *str);
 int executor(char **cmds);
-int parser(cmd_str *c_s, char **cmds[]);
-int cmd_fill(cmd_str *c_s, char **cmds[]);
-void free_list(cmd_str *head);
+int parser(char **cmds[]);
 
 #endif /*_SCRAP_H_*/

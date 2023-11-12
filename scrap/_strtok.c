@@ -1,4 +1,4 @@
-#include <scrap.h>
+#include "scrap.h"
 
 /**
  * _strtok - breaks a string into sections
@@ -7,7 +7,7 @@
  *
  * Return: pointer to the tokenised string
  */
-char *_strtok(char *str, const char *delim)
+char *_strtok(char *str, char *delim)
 {
 	static char *tok_ptr;
 	static long int str_len;

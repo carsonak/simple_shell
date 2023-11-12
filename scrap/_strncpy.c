@@ -10,7 +10,7 @@
  */
 char *_strncpy(char *dest, char *src, int n)
 {
-	unsigned long int i, j, l = strlen(src);
+	long int i, j, l = strlen(src);
 
 	for (i = 0, j = 0; i < n; i++, j++)
 	{

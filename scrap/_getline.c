@@ -1,4 +1,4 @@
-#include <scrap.h>
+#include "scrap.h"
 
 /**
  * _getline - reads a line (ends with a '\n') from a file descriptor.
@@ -10,8 +10,9 @@
  */
 int _getline(char **lineptr, int *n_c, int fd)
 {
-	char buffer[BUFFER_SIZE], *lBuf;
-	ssize_t err = 0, i = 0;
+	char buffer[BUFFER_SIZE];
+	ssize_t err = 0;
+	unsigned long int i = 0;
 
 	_memset(buffer, '\0', BUFFER_SIZE);
 

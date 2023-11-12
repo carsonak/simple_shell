@@ -10,8 +10,7 @@
 int main(int argc, char *argv[])
 {
 	char **cmds = NULL;
-	int err, i = 0;
-	cmd_str *c_s = NULL, *walk = c_s;
+	long int err;
 
 	if (argc == 1)
 	{
@@ -24,21 +23,13 @@ int main(int argc, char *argv[])
 				return (EXIT_FAILURE);
 			}
 
-			err = parser(c_s, &cmds);
-			if (err == 0)
+			err = parser(&cmds);
+			if (err > 0)
 			{
-				for (i = 0; walk; i++)
-				{
-					if (walk->command)
-						printf("%s\n", walk->command);
-
-					walk = walk->next;
-				}
-
-				free_list(c_s);
+				/*Search the PATH for directory with the file before executing*/
 				executor(cmds);
 			}
-			else
+			else if (err == -1)
 				write(STDERR_FILENO, "Could not parse command\n", 25);
 		}
 	}
