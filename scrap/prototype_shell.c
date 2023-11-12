@@ -9,35 +9,37 @@
  */
 int main(int argc, char *argv[])
 {
-	char **cmds;
-	char buf[1024];
-	int err;
+	char **cmds = NULL;
+	int err, i = 0;
+	cmd_str *c_s = NULL, *walk = c_s;
 
 	if (argc == 1)
 	{
 		while (1)
 		{
-			err = write(1, "$! ", 2);
+			err = write(1, "$!", 2);
 			if (err == -1)
 			{
 				perror("Whoops");
 				return (EXIT_FAILURE);
 			}
-			err = read(0, buf, 1024);
-			if (err == -1)
-			{
-				perror("Failed to read");
-				return (EXIT_FAILURE);
-			}
 
-			err = write(1, buf, strlen(buf));
-			if (err == -1)
+			err = parser(c_s, &cmds);
+			if (err == 0)
 			{
-				perror("Failed to write");
-				return (EXIT_FAILURE);
-			}
+				for (i = 0; walk; i++)
+				{
+					if (walk->command)
+						printf("%s\n", walk->command);
 
-			memset(buf, '\0', 1024);
+					walk = walk->next;
+				}
+
+				free_list(c_s);
+				executor(cmds);
+			}
+			else
+				write(STDERR_FILENO, "Could not parse command\n", 25);
 		}
 	}
 	else
