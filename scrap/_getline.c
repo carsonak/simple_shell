@@ -23,6 +23,7 @@ int _getline(char **lineptr, int *n_c, int fd)
 	for (i = 0; (i < BUFFER_SIZE) && (buffer[i] != '\n'); i++)
 		;
 
+	i++;
 	if (!(*lineptr) || sizeof(*lineptr) < i)
 	{
 		*lineptr = malloc(i);
