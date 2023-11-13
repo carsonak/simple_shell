@@ -34,5 +34,6 @@ char *_strncpy(char *dest, char *src, int n);
 cmd_str *add_node_end(cmd_str **head, char *str);
 int executor(char **cmds);
 int parser(char **cmds[]);
+void free_list(cmd_str *head);
 
 #endif /*_SCRAP_H_*/

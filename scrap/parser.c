@@ -19,9 +19,8 @@ int parser(char **cmds[])
 		return (-1);
 	}
 
-	str[j] = '\0';
+	str[j - 1] = '\0';
 	token = _strtok(str, "\"\"\'\' ");
-
 	for (i = 1; token; i++)
 	{
 		lst_err = add_node_end(&head, token);
@@ -31,19 +30,22 @@ int parser(char **cmds[])
 		token = _strtok(NULL, "\"\"\'\' ");
 	}
 
+	lst_err = add_node_end(&head, "");
+	free(str);
 	*cmds = malloc(sizeof(**cmds) * i);
 	if (!(*cmds))
 	{
-		perror("parser() error");
+		perror("parser() error: Couldn't allocate memory for commands");
 		return (-1);
 	}
 
 	walk = head;
-	for (j = 0; j <= i; j++)
+	for (j = 0; j < i; j++)
 	{
 		*cmds[j] = walk->command;
 		walk = walk->next;
 	}
 
+	free_list(head);
 	return (i);
 }

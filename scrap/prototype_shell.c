@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 			{
 				/*Search the PATH for directory with the file before executing*/
 				executor(cmds);
+				free(cmds);
 			}
 			else if (err == -1)
 				write(STDERR_FILENO, "Could not parse command\n", 25);

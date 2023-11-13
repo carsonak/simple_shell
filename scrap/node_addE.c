@@ -21,7 +21,7 @@ cmd_str *add_node_end(cmd_str **head, char *str)
 	new_node = malloc(sizeof(cmd_str));
 	if (!new_node)
 	{
-		perror("add_node_end() error! Could allocate memory");
+		perror("add_node_end() error! Couldn't allocate memory");
 		return (NULL);
 	}
 
