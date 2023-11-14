@@ -24,7 +24,7 @@ int _getline(char **line, int *n_c, int fd)
 		;
 
 	i += 1;
-	if (!(*line) || sizeof(*line) < i)
+	if (!(*line) || (sizeof(*line) < i))
 	{
 		*line = malloc(i);
 		if (!(*line))

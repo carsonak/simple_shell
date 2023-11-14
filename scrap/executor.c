@@ -6,14 +6,11 @@
  *
  * Return: standard success int or standard failure int
  */
-int executor(char **cmds)
+int executor(char *cmds[])
 {
 	pid_t frk1 = 0, frkerr = 0;
-	int err = 0, status, i;
+	int err = 0, status;
 	char **nwenviron = __environ;
-
-	for (i = 0; cmds[i]; i++)
-		write(STDOUT_FILENO, cmds[i], _strlen(cmds[i]));
 
 	/*Forking the processes and recording the PIDs*/
 	frk1 = fork();
