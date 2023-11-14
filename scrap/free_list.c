@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  * free_list - frees space allocated to a linked list

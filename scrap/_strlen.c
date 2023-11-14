@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  *_strlen - calculates length of a string

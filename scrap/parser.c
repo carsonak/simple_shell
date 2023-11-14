@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  * parser - reads a line from standard input and breaks it into
@@ -9,17 +9,17 @@
 int parser(char **cmds[])
 {
 	char *str = NULL, *token = NULL;
-	int err = 0, i = 0, j = 0;
+	int err = 0, i = 0, ln_idx = 0;
 	cmd_str *head = NULL, *walk = NULL, *lst_err = NULL;
 
-	err = _getline(&str, &j, STDIN_FILENO);
+	err = _getline(&str, &ln_idx, STDIN_FILENO);
 	if (err == -1)
 	{
 		perror("_getline() error");
 		return (-1);
 	}
 
-	str[j - 1] = '\0';
+	str[ln_idx - 1] = '\0';
 	token = _strtok(str, "\"\"\'\' ");
 	for (i = 1; token; i++)
 	{
@@ -40,9 +40,9 @@ int parser(char **cmds[])
 	}
 
 	walk = head;
-	for (j = 0; j < i; j++)
+	for (ln_idx = 0; ln_idx < i; ln_idx++)
 	{
-		*cmds[j] = walk->command;
+		*cmds[ln_idx] = walk->command;
 		walk = walk->next;
 	}
 

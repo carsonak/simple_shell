@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  *_strncpy - copies a string with at most n characters to dest.

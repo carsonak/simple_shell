@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  * main - a simple non-interactive shell

@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  *_strspn - checks for the first occurences of a set of characters in a string
