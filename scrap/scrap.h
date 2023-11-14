@@ -16,5 +16,6 @@
 #include <sys/stat.h> /*open()*/
 
 int executor(char **cmds);
+char *find_in_path(char *command);
 
 #endif /*_SCRAP_H_*/
