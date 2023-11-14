@@ -23,7 +23,6 @@ cmd_str *add_node_end(cmd_str **head, char *str)
 		perror("add_node_end() error! Couldn't allocate memory");
 		return (NULL);
 	}
-
 	if (_strlen(str))
 	{
 		new_node->command = _strdup(str);
@@ -39,18 +38,15 @@ cmd_str *add_node_end(cmd_str **head, char *str)
 
 	new_node->len = _strlen(str);
 	new_node->next = NULL;
-
 	if (!(*head))
 	{
 		*head = new_node;
 		return (new_node);
 	}
-
 	temp = *head;
 	while (temp->next)
 		temp = temp->next;
 
 	temp->next = new_node;
-
 	return (new_node);
 }
