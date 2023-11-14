@@ -3,9 +3,9 @@
 /**
  * cmds_fill - allocates memory for the strings in the array
  * @head: pointer to struct with command strings
- * @cmds: array of strings
+ * @cmds: an array of pointers
  *
- * Return: array of pointers
+ * Return: array of pointers, NULL on failure
  */
 char **cmds_fill(cmd_str *head, char **cmds)
 {
@@ -22,14 +22,6 @@ char **cmds_fill(cmd_str *head, char **cmds)
 			return (NULL);
 		}
 		walk = walk->next;
-	}
-
-	cmds[i] = malloc((sizeof(**cmds) * 1));
-	if (cmds[i] == NULL)
-	{
-		free_args(cmds);
-		perror("cmds_fill memory failure");
-		return (NULL);
 	}
 
 	walk = head;

@@ -11,6 +11,5 @@ void free_args(char **cmds)
 	for (i = 0; cmds[i]; i++)
 		free(cmds[i]);
 
-	free(cmds[i]);
 	free(cmds);
 }

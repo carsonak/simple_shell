@@ -30,13 +30,15 @@ int executor(char **cmds)
 		frkerr = waitpid(frk1, &status, 0);
 		if (frkerr == -1)
 			perror("Wait error");
-		else
-		{
-			if (WIFEXITED(status))
-				write(STDOUT_FILENO, "Child exited ok\n", 16);
-			else
-				write(STDERR_FILENO, "Child exited abnormally\n", 24);
-		}
+		/**
+		 * else
+		 * {
+		 *	if (WIFEXITED(status))
+		 *	dprintf(STDERR_FILENO, "%d: Status %d\n", frkerr, WEXITSTATUS(status));
+		 *	else
+		 *		dprintf(STDERR_FILENO, "%d: Exited abnormally", frkerr);
+		 * }
+		 */
 	}
 
 	return (EXIT_SUCCESS);
