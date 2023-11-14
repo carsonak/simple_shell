@@ -9,7 +9,7 @@
  */
 int main(int argc, char *argv[])
 {
-	char **cmds;
+	char **cmds = NULL;
 	long int err;
 
 	if (argc == 1)
@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
 				return (EXIT_FAILURE);
 			}
 
-			err = parser(&cmds);
-			if (err > 0)
+			cmds = parser(cmds);
+			if (cmds)
 			{
 				/*Search the PATH for directory with the file before executing*/
 				flush_io();

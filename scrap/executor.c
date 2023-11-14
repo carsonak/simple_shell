@@ -6,23 +6,18 @@
  *
  * Return: standard success int or standard failure int
  */
-int executor(char *cmds[])
+int executor(char **cmds)
 {
 	pid_t frk1 = 0, frkerr = 0;
 	int err = 0, status;
 	char **nwenviron = __environ;
 
-	/*Forking the processes and recording the PIDs*/
 	frk1 = fork();
 
 	if (frk1 == -1)
 		perror("Couldn't fork");
 	else if (frk1 == 0)
 	{
-		/**
-		 * Replacing the current program with the program or
-		 * script specified in cmds[0].
-		 */
 		err = execve(cmds[0], cmds, nwenviron);
 		if (err == -1)
 		{
@@ -32,7 +27,6 @@ int executor(char *cmds[])
 	}
 	else
 	{
-		/*Parent waits for child to terminate and handles any errors*/
 		frkerr = waitpid(frk1, &status, 0);
 		if (frkerr == -1)
 			perror("Wait error");

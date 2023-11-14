@@ -33,10 +33,11 @@ char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
 char *_strdup(char *str);
 cmd_str *add_node_end(cmd_str **head, char *str);
-int executor(char *cmds[]);
-int parser(char **cmds[]);
+int executor(char **cmds);
+char **parser(char **cmds);
 void free_list(cmd_str *head);
 void flush_io(void);
 void free_args(char **cmds);
+char **cmds_fill(cmd_str *head, char **cmds);
 
 #endif /*_SHELL_H_*/
