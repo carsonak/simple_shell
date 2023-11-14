@@ -35,14 +35,25 @@ int parser(char **cmds[])
 	lst_err = add_node_end(&head, "");
 	free(str);
 
+	*cmds = malloc(sizeof(**cmds) * i);
+	if (!(*cmds))
+	{
+		perror("Couldn't allocate memory for commands");
+		return (-1);
+	}
+
 	printf("sizeof(*cmds) = %ld\n", sizeof(*cmds));
 	walk = head;
 	for (ln_idx = 0; ln_idx < i && ln_idx < 10; ln_idx++)
 	{
 		printf("[%ld] %s\n", sizeof(**cmds) * ln_idx, walk->command);
-		*cmds[ln_idx] = _strdup(walk->command);
-		free(walk->command);
-		printf("[%ld] %s\n", sizeof(**cmds) * ln_idx, *cmds[ln_idx]);
+
+		*cmds[sizeof(**cmds) * ln_idx] = _strdup(walk->command);
+
+		/*free(walk->command);*/
+
+		printf("[%ld] %s\n", sizeof(**cmds) * ln_idx, *cmds[sizeof(**cmds) * ln_idx]);
+
 		walk = walk->next;
 	}
 
