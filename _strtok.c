@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  * _strtok - breaks a string into sections
@@ -20,7 +20,10 @@ char *_strtok(char *str, char *delim)
 		str_len = _strlen(tok_ptr);
 	}
 
-	tok_ptr = &tok_ptr[_strspn(tok_ptr, delim)];
+	if (str_len <= 0)
+		return (NULL);
+
+	tok_ptr += _strspn(tok_ptr, delim);
 	tok_b = tok_ptr;
 
 	while (str_len > 0)
@@ -39,9 +42,6 @@ char *_strtok(char *str, char *delim)
 		if (delim[i])
 			break;
 	}
-
-	if (str_len <= 0)
-		tok_b = NULL;
 
 	return (tok_b);
 }

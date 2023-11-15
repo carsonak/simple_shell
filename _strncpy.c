@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  *_strncpy - copies a string with at most n characters to dest.
@@ -10,7 +10,7 @@
  */
 char *_strncpy(char *dest, char *src, int n)
 {
-	long int i, j, l = strlen(src);
+	long int i, j, l = _strlen(src);
 
 	for (i = 0, j = 0; i < n; i++, j++)
 	{

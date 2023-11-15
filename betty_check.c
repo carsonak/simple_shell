@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 /**
  * add -Adds two integers
  * @num1 : the first integer to be added

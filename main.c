@@ -1,4 +1,4 @@
-#include "scrap.h"
+#include "shell.h"
 
 /**
  * main - a simple non-interactive shell
@@ -23,11 +23,13 @@ int main(int argc, char *argv[])
 				return (EXIT_FAILURE);
 			}
 
-			err = parser(&cmds);
-			if (err > 0)
+			cmds = parser(cmds);
+			if (cmds)
 			{
 				/*Search the PATH for directory with the file before executing*/
+				flush_io();
 				executor(cmds);
+				free_args(cmds);
 			}
 			else if (err == -1)
 				write(STDERR_FILENO, "Could not parse command\n", 25);
@@ -39,6 +41,7 @@ int main(int argc, char *argv[])
 		 * Should be able to detrmine if command exist via searching
 		 * the PATH environment variable before calling the executor.
 		 */
+
 		cmds = &argv[1];
 		executor(cmds);
 	}
