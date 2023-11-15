@@ -34,7 +34,7 @@ char *_strtok(char *str, char *delim);
 char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
 char *_strdup(char *str);
-cmd_str *add_node_end(cmd_str **head, char *str);
+/*cmd_str *add_node_end(cmd_str **head, char *str);*/
 void parse_n_exec(void);
 int executor(char **cmds);
 char **parser(char **cmds);
@@ -44,5 +44,4 @@ void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
 int shell_env(void);
 int _putchar(char c);
-
 #endif /*_SHELL_H_*/
