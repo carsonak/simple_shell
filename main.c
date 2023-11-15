@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
 	char **cmds = NULL;
 	long int err;
 
+	errno = 0;
 	if (argc == 1)
 	{
-		errno = 0;
 		err = isatty(STDIN_FILENO);
 		if (err)
 		{
@@ -26,38 +26,17 @@ int main(int argc, char *argv[])
 					perror("Whoops");
 					return (EXIT_FAILURE);
 				}
-
-				cmds = parser(cmds);
-				if (cmds)
-				{
-					/*Search the PATH for directory with the file before executing*/
-					flush_io();
-					executor(cmds);
-					free_args(cmds);
-				}
-				else if (err == -1)
-					write(STDERR_FILENO, "Could not parse command\n", 25);
+				parse_n_exec();
 			}
 		}
 		else
 		{
 			if (errno == ENOTTY)
-			{
-				cmds = parser(cmds);
-				if (cmds)
-				{
-					/*Search the PATH for directory with the file before executing*/
-					flush_io();
-					executor(cmds);
-					free_args(cmds);
-				}
-				else if (err == -1)
-					write(STDERR_FILENO, "Could not parse command\n", 25);
-			}
+				parse_n_exec();
 			else
 				perror("Corrupted input");
 		}
-		}
+	}
 	else
 	{
 		/**
@@ -69,4 +48,23 @@ int main(int argc, char *argv[])
 	}
 
 	return (0);
+}
+
+/**
+ * parse_n_exec - parses std input and executes the commands
+ */
+void parse_n_exec(void)
+{
+	char **cmds = NULL;
+
+	cmds = parser(cmds);
+	if (cmds)
+	{
+		/*Search the PATH for directory with the file before executing*/
+		flush_io();
+		executor(cmds);
+		free_args(cmds);
+	}
+	else
+		write(STDERR_FILENO, "Couldn't parse command\n", 24);
 }
