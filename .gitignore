@@ -1,0 +1,5 @@
+#gitignore for roughwork folders and test-suite
+scrap
+TEST_SUITE
+runchecker.bash
+sh_checker_log.txt
