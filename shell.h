@@ -1,16 +1,18 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#include <string.h>	  /*strtok(), strlen()*/
-#include <stdio.h>	  /*perror(), dprintf()*/
-#include <errno.h>	  /*perror(), errno global variables*/
-#include <unistd.h>	  /*write(), fork(), execve(), read(), close()*/
+#include <string.h> /*strtok(), strlen()*/
+#include <stdio.h>	/*perror(), dprintf()*/
+#include <errno.h>	/*perror(), errno global variables*/
+#include <unistd.h> /*write(), fork(), execve(), read(), close()*/
+#include <limits.h>
 #include <stdlib.h>	  /*exit()*/
 #include <fcntl.h>	  /*open()*/
+#include <signal.h>	  /*signal()*/
 #include <sys/types.h>/*wait(), waitpid(), fork(), open()*/
 #include <sys/wait.h> /*wait(), waitpid()*/
 #include <sys/stat.h> /*open()*/
-#define BUFFER_SIZE (1024 * 5)
+#define BUFFER_SIZE (1024 * 10)
 
 /**
  * struct command_string_list - linked list of a command and it's options
@@ -33,6 +35,7 @@ char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
 char *_strdup(char *str);
 cmd_str *add_node_end(cmd_str **head, char *str);
+void parse_n_exec(void);
 int executor(char **cmds);
 char **parser(char **cmds);
 void free_list(cmd_str *head);
