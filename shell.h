@@ -40,5 +40,6 @@ void flush_io(void);
 void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
 int shell_env(void);
+int _putchar(char c);
 
 #endif /*_SHELL_H_*/
