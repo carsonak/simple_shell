@@ -16,5 +16,8 @@
 #include <sys/stat.h> /*open()*/
 
 int executor(char **cmds);
+char *_strncat( char *src, char *d,int m);
+char *_strncpy(char *src, char *d, int m);
+char *_strchr(char *s, char c);
 
 #endif /*_SCRAP_H_*/
