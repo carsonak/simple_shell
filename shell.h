@@ -44,4 +44,5 @@ void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
 int shell_env(void);
 int _putchar(char c);
+void exit(char *cmd);
 #endif /*_SHELL_H_*/
