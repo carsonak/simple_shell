@@ -19,7 +19,7 @@ char **parser(char **cmds)
 	}
 
 	str[idx - 1] = '\0';
-	token = _strtok(str, " \"");
+	token = _strtok(str, "\"");
 	for (i = 1; token; i++)
 	{
 		lst_err = add_node_end(&head, token);
