@@ -49,7 +49,6 @@ void flush_io(void);
 void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
 int shell_env(void);
-int main(int ac, char **av, char **env);
 int _putchar(char c);
 void shell_exit(void);
 void remove_newline(char *str);
