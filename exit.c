@@ -1,16 +1,28 @@
+
 #include "shell.h"
 
 /**
  * exit : function that terminate the prog when user type "exit"
- * @cmd :string to read
- * return:  nothing.
- **/
-void exit(char *cmd)
+ */
+void sh_exit(void)
 {
-	if (_strcmp("exit", cmd) == 0)
-	{
-		free(cmd);
-		exit(EXIT_SUCCESS);
-	}
+	printf("Exit the shell \n");
+	exit(0);
 }
+int main(void)
+{
+	char input[MAX_INPUT];
 
+	while(1)
+	{
+		printf("cisfun ");
+		fgets (input, sizeof(input), stdin);
+
+		if (strcmp(input, "exit") == 0)
+		{
+			sh_exit();
+		}
+	system(input);
+	}
+	return (0);
+}
