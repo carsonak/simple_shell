@@ -10,18 +10,15 @@
 int main(int argc, char *argv[])
 {
 	char **cmds = NULL;
-	long int err;
 
 	errno = 0;
 	if (argc == 1)
 	{
-		err = isatty(STDIN_FILENO);
-		if (err)
+		if (isatty(STDIN_FILENO))
 		{
 			while (1)
 			{
-				err = write(1, "$!", 2);
-				if (err == -1)
+				if (write(1, "$!", 2) == -1)
 				{
 					perror("Whoops");
 					return (EXIT_FAILURE);
@@ -39,14 +36,18 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		/**
-		 * Should be able to detrmine if command exist via searching
-		 * the PATH environment variable before calling the executor.
-		 */
 		cmds = &argv[1];
-		executor(cmds);
-	}
+		if (cmds[0][0] != '/')
+			cmds[0] = isPath(cmds[0]);
 
+		if (cmds[0])
+		{
+			executor(cmds);
+			free(cmds[0]);
+		}
+		else if ((errno == 0) && !cmds[0])
+			write(STDERR_FILENO, "Command not found\n", 19);
+	}
 	return (0);
 }
 
@@ -55,14 +56,24 @@ int main(int argc, char *argv[])
  */
 void parse_n_exec(void)
 {
-	char **cmds = NULL;
+	char **cmds = NULL, *backup = NULL;
 
 	cmds = parser(cmds);
 	if (cmds)
 	{
-		/*Search the PATH for directory with the file before executing*/
+		if (cmds[0][0] != '/')
+		{
+			backup = cmds[0];
+			cmds[0] = isPath(cmds[0]);
+			free(backup);
+		}
+
 		flush_io();
-		executor(cmds);
+		if (cmds[0])
+			executor(cmds);
+		else if ((errno == 0) && !cmds[0])
+			write(STDERR_FILENO, "Command not found\n", 19);
+
 		free_args(cmds);
 	}
 	else
