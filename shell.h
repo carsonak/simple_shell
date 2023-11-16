@@ -20,6 +20,9 @@
  * @len: length of the command
  * @next: pointer to next node
  */
+
+extern char** environ;
+
 typedef struct command_string_list
 {
 	char *command;
@@ -34,7 +37,7 @@ char *_strtok(char *str, char *delim);
 char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
 char *_strdup(char *str);
-/*cmd_str *add_node_end(cmd_str **head, char *str);*/
+cmd_str *add_node_end(cmd_str **head, char *str);
 void parse_n_exec(void);
 int executor(char **cmds);
 char **parser(char **cmds);
@@ -43,6 +46,6 @@ void flush_io(void);
 void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
 int shell_env(void);
+int main(int ac, char **av, char **env);
 int _putchar(char c);
-void exit(char *cmd);
 #endif /*_SHELL_H_*/
