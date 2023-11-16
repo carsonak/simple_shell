@@ -46,8 +46,6 @@ void flush_io(void);
 void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
 int shell_env(void);
-int _putchar(char c);
-void exit(char *cmd);
 char *isPath(char *cmd);
 int searchDIR(char *directory, char *file);
 
