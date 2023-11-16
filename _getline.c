@@ -20,10 +20,7 @@ int _getline(char **line, int *n_c, int fd)
 	if (err == -1)
 		return (-1);
 	else if (err == 0)
-	{
-		write(STDOUT_FILENO, "\n", 1);
 		exit(EXIT_SUCCESS);
-	}
 
 	for (i = 0; (i < BUFFER_SIZE - 1) && (buffer[i] != '\n'); i++)
 		;
