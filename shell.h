@@ -1,14 +1,14 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#include <string.h> /*strtok(), strlen()*/
-#include <stdio.h>	/*perror(), dprintf()*/
-#include <errno.h>	/*perror(), errno global variables*/
-#include <unistd.h> /*write(), fork(), execve(), read(), close()*/
-#include <limits.h>
+#include <string.h>	  /*strtok(), strlen()*/
+#include <stdio.h>	  /*perror(), dprintf()*/
+#include <errno.h>	  /*perror(), errno global variables*/
+#include <unistd.h>	  /*write(), fork(), execve(), read(), close()*/
 #include <stdlib.h>	  /*exit()*/
 #include <fcntl.h>	  /*open()*/
 #include <signal.h>	  /*signal()*/
+#include <dirent.h>	  /*opendir(), readdir()*/
 #include <sys/types.h>/*wait(), waitpid(), fork(), open()*/
 #include <sys/wait.h> /*wait(), waitpid()*/
 #include <sys/stat.h> /*open()*/
@@ -20,7 +20,7 @@
  * @len: length of the command
  * @next: pointer to next node
  */
-#define
+
 extern char** environ;
 
 typedef struct command_string_list
@@ -37,6 +37,9 @@ char *_strtok(char *str, char *delim);
 char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
 char *_strdup(char *str);
+int _strncmp(char *s1, char *s2, unsigned int n);
+char *_strncat(char *dest, char *src, int n);
+char *_getenv(char *name);
 cmd_str *add_node_end(cmd_str **head, char *str);
 void parse_n_exec(void);
 int executor(char **cmds);
@@ -50,4 +53,7 @@ int main(int ac, char **av, char **env);
 int _putchar(char c);
 void shell_exit(void);
 void remove_newline(char *str);
+char *isPath(char *cmd);
+int searchDIR(char *directory, char *file);
+
 #endif /*_SHELL_H_*/
