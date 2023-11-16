@@ -13,14 +13,14 @@
 #include <sys/wait.h> /*wait(), waitpid()*/
 #include <sys/stat.h> /*open()*/
 #define BUFFER_SIZE (1024 * 10)
-
+#define MAX_INPUT_SIZE 1024
 /**
  * struct command_string_list - linked list of a command and it's options
  * @command: null terminated string
  * @len: length of the command
  * @next: pointer to next node
  */
-
+#define
 extern char** environ;
 
 typedef struct command_string_list
@@ -48,4 +48,6 @@ char **cmds_fill(cmd_str *head, char **cmds);
 int shell_env(void);
 int main(int ac, char **av, char **env);
 int _putchar(char c);
+void shell_exit(void);
+void remove_newline(char *str);
 #endif /*_SHELL_H_*/
