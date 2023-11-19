@@ -9,19 +9,18 @@
 #include <fcntl.h>	  /*open()*/
 #include <signal.h>	  /*signal()*/
 #include <dirent.h>	  /*opendir(), readdir()*/
+#include <stdbool.h>  /*bool*/
 #include <sys/types.h>/*wait(), waitpid(), fork(), open()*/
 #include <sys/wait.h> /*wait(), waitpid()*/
 #include <sys/stat.h> /*open()*/
-#define BUFFER_SIZE (1024 * 10)
 #define MAX_INPUT_SIZE 1024
+#define BUFFER_SIZE (1024 * 1024)
 /**
  * struct command_string_list - linked list of a command and it's options
  * @command: null terminated string
  * @len: length of the command
  * @next: pointer to next node
  */
-
-extern char** environ;
 
 typedef struct command_string_list
 {
@@ -32,7 +31,9 @@ typedef struct command_string_list
 
 unsigned long int _strlen(char *s);
 unsigned int _strspn(char *s, char *accept);
-int _getline(char **line, int *n_c, int fd);
+long int _getline(char **line, ssize_t *ln_sz, int fd);
+ssize_t find_line(char *buff, int crnt_i);
+char *mem_line(char *line, int sz);
 char *_strtok(char *str, char *delim);
 char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
@@ -41,9 +42,10 @@ int _strncmp(char *s1, char *s2, unsigned int n);
 char *_strncat(char *dest, char *src, int n);
 char *_getenv(char *name);
 cmd_str *add_node_end(cmd_str **head, char *str);
+void prompt(void);
 void parse_n_exec(void);
 int executor(char **cmds);
-char **parser(char **cmds);
+char **parser(char **cmds, char *line);
 void free_list(cmd_str *head);
 void flush_io(void);
 void free_args(char **cmds);
@@ -52,7 +54,10 @@ int shell_env(void);
 int _putchar(char c);
 void shell_exit(void);
 void remove_newline(char *str);
-char *isPath(char *cmd);
-int searchDIR(char *directory, char *file);
+int isPath(char **cmd);
+int abs_search(char *path);
+int searchDIR(char *dirPath, char *file);
+int is_abs_path(char *cmd);
+char *make_path(char *directory, char *file);
 
 #endif /*_SHELL_H_*/

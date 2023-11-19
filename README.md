@@ -1,6 +1,6 @@
 #### SIMPLE_SHELL
 This is a simple shell program that has the show features.
-Compile command: gcc -Wall -Werror -Wextra -pedantic -std=gnu89 -g *.c -o simple_shell
+Compile command: gcc -Wall -Werror -Wextra -pedantic -std=gnu89 -g *.c -o s_sh
 
 ##### 0.
 This program has been written in [Betty coding style](https://github.com/alx-tools/Betty/wiki#1-coding-style) and [documentation](https://github.com/alx-tools/Betty/wiki#2-documentation).

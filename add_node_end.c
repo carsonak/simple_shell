@@ -20,7 +20,7 @@ cmd_str *add_node_end(cmd_str **head, char *str)
 	new_node = malloc(sizeof(cmd_str));
 	if (!new_node)
 	{
-		perror("add_node_end() error! Couldn't allocate memory");
+		perror("add_node_end() error! Malloc fail");
 		return (NULL);
 	}
 	if (_strlen(str))
@@ -28,7 +28,7 @@ cmd_str *add_node_end(cmd_str **head, char *str)
 		new_node->command = _strdup(str);
 		if (!(new_node->command))
 		{
-			perror("add_node_end() error! Couldn't duplicate string");
+			perror("add_node_end() error! _strdup fail");
 			free(new_node);
 			return (NULL);
 		}

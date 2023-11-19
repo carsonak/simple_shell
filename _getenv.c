@@ -8,16 +8,17 @@
  */
 char *_getenv(char *name)
 {
-	char **ep = NULL;
+	char **enV = NULL;
 	unsigned long int len = 0;
 
-	if (__environ == NULL || name[0] == '\0')
+	if (__environ == NULL || name[0] == '\0' || !name)
 		return (NULL);
 
 	len = _strlen(name);
-	for (ep = __environ; *ep != NULL; ++ep)
-		if (name[0] == (*ep)[0] && !(_strncmp(name, *ep, len)) && (*ep)[len] == '=')
-			return (*ep + len + 1);
+	for (enV = __environ; *enV != NULL; ++enV)
+		if (name[0] == (*enV)[0] && !(_strncmp(name, *enV, len)) &&
+			(*enV)[len] == '=')
+			return (*enV + len + 1);
 
 	return (NULL);
 }
