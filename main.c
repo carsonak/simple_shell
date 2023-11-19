@@ -10,45 +10,32 @@
 int main(int argc, char *argv[])
 {
 	char **cmds = NULL;
+	int err = 0;
 
 	errno = 0;
 	if (argc == 1)
 	{
-		if (isatty(STDIN_FILENO))
+		while (1)
 		{
-			while (1)
-			{
-				if (write(1, "$!", 2) == -1)
-				{
-					perror("Whoops");
-					return (EXIT_FAILURE);
-				}
-				parse_n_exec();
-			}
-		}
-		else
-		{
-			if (errno == ENOTTY)
-				parse_n_exec();
-			else
-				perror("Corrupted input");
+			errno = 0;
+			if (isatty(STDIN_FILENO))
+				prompt();
+
+			parse_n_exec();
 		}
 	}
 	else
 	{
 		cmds = &argv[1];
-		if (cmds[0][0] != '/')
-			cmds[0] = isPath(cmds[0]);
-
-		if (cmds[0])
-		{
+		err = isPath(&cmds[0]);
+		if (err == 1)
 			executor(cmds);
-			free(cmds[0]);
-		}
-		else if ((errno == 0) && !cmds[0])
+		else if (!err)
 			write(STDERR_FILENO, "Command not found\n", 19);
+		else if (err == -1)
+			perror("isPath() failure");
 	}
-	return (0);
+	exit(EXIT_SUCCESS);
 }
 
 /**
@@ -56,26 +43,55 @@ int main(int argc, char *argv[])
  */
 void parse_n_exec(void)
 {
-	char **cmds = NULL, *backup = NULL;
+	char **cmds = NULL, *line = NULL;
+	ssize_t err = 0, ln_sz = 0;
 
-	cmds = parser(cmds);
-	if (cmds)
+	while (1)
 	{
-		if (cmds[0][0] != '/')
+		errno = 0;
+		line = NULL;
+		err = _getline(&line, &ln_sz, STDIN_FILENO);
+		if (ln_sz > 0)
 		{
-			backup = cmds[0];
-			cmds[0] = isPath(cmds[0]);
-			free(backup);
+			if (ln_sz == 1 && line[0] == '\n')
+			{
+				free(line);
+				return;
+			}
+
+			if (line[ln_sz - 1] == '\n')
+				line[ln_sz - 1] = '\0';
+
+			cmds = parser(cmds, line);
+			if (cmds)
+			{
+				err = isPath(&cmds[0]);
+				flush_io();
+				if (err == 1)
+					executor(cmds);
+				else if (!err)
+					write(STDERR_FILENO, "Command not found\n", 19);
+				else if (err == -1)
+					perror("isPath() failure");
+
+				free_args(cmds);
+			}
 		}
-
-		flush_io();
-		if (cmds[0])
-			executor(cmds);
-		else if ((errno == 0) && !cmds[0])
-			write(STDERR_FILENO, "Command not found\n", 19);
-
-		free_args(cmds);
+		else if (err < 0)
+			perror("_getline() error");
+		else if (!err && !ln_sz)
+			break;
 	}
-	else
-		write(STDERR_FILENO, "Couldn't parse command\n", 24);
+}
+
+/**
+ * prompt - writes a prompt to the std_out
+ */
+void prompt(void)
+{
+	if (write(STDOUT_FILENO, "$!", 2) == -1)
+	{
+		perror("Whoops");
+		exit(EXIT_FAILURE);
+	}
 }

@@ -3,23 +3,17 @@
 /**
  * parser - reads a line from standard input and breaks it into
  * @cmds: address of an array of pointers
+ * @line: string to be parsed
  *
  * Return: number of commands parsed, -1 on failure
  */
-char **parser(char **cmds)
+char **parser(char **cmds, char *line)
 {
-	char *str = NULL, *token = NULL;
-	int i = 0, idx = 0;
+	char *token = NULL;
+	int i = 0;
 	cmd_str *head = NULL, *lst_err = NULL;
 
-	if (_getline(&str, &idx, STDIN_FILENO) == -1)
-	{
-		perror("_getline() error");
-		return (NULL);
-	}
-
-	str[idx - 1] = '\0';
-	token = _strtok(str, " ");
+	token = _strtok(line, " ");
 	for (i = 1; token; i++)
 	{
 		lst_err = add_node_end(&head, token);
@@ -30,7 +24,7 @@ char **parser(char **cmds)
 	}
 
 	lst_err = add_node_end(&head, "");
-	free(str);
+	free(line);
 
 	cmds = malloc(sizeof(*cmds) * i);
 	if (!(cmds))
