@@ -23,8 +23,12 @@ char *_strtok(char *str, char *delim)
 	if (str_len <= 0)
 		return (NULL);
 
-	tok_ptr += _strspn(tok_ptr, delim);
+	i = _strspn(tok_ptr, delim);
+	str_len -= i;
+	tok_ptr += i;
 	tok_b = tok_ptr;
+	if (str_len <= 0)
+		return (NULL);
 
 	while (str_len > 0)
 	{

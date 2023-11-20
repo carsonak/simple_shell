@@ -13,15 +13,14 @@
 #include <sys/types.h>/*wait(), waitpid(), fork(), open()*/
 #include <sys/wait.h> /*wait(), waitpid()*/
 #include <sys/stat.h> /*open()*/
-#define MAX_INPUT_SIZE 1024
 #define BUFFER_SIZE (1024 * 1024)
+
 /**
  * struct command_string_list - linked list of a command and it's options
  * @command: null terminated string
  * @len: length of the command
  * @next: pointer to next node
  */
-
 typedef struct command_string_list
 {
 	char *command;
@@ -32,7 +31,8 @@ typedef struct command_string_list
 unsigned long int _strlen(char *s);
 unsigned int _strspn(char *s, char *accept);
 long int _getline(char **line, ssize_t *ln_sz, int fd);
-ssize_t find_line(char *buff, int crnt_i);
+ssize_t byteRd(int fd, char *buff);
+ssize_t find_line(char *buff, ssize_t crnt_i, ssize_t byt_cnt);
 char *mem_line(char *line, int sz);
 char *_strtok(char *str, char *delim);
 char *_memset(char *s, char c, unsigned int n);
@@ -50,14 +50,11 @@ void free_list(cmd_str *head);
 void flush_io(void);
 void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
-int shell_env(void);
-int _putchar(char c);
-void shell_exit(void);
-void remove_newline(char *str);
 int isPath(char **cmd);
 int abs_search(char *path);
 int searchDIR(char *dirPath, char *file);
 int is_abs_path(char *cmd);
 char *make_path(char *directory, char *file);
+int E_status(int stat);
 
 #endif /*_SHELL_H_*/
