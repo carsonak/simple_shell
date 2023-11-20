@@ -22,7 +22,7 @@ int executor(char **cmds)
 		if (err == -1)
 		{
 			perror("Couldn't execute");
-			exit(EXIT_FAILURE);
+			exit(E_status(EXIT_FAILURE));
 		}
 	}
 	else
@@ -41,5 +41,5 @@ int executor(char **cmds)
 		 */
 	}
 
-	return (EXIT_SUCCESS);
+	return (E_status(EXIT_SUCCESS));
 }

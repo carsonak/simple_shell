@@ -9,72 +9,86 @@
  * Description: This function does not work the same as the std getline
  * function.
  *
- * Return: number of characters in line, -1 on read fail, -2 on malloc fail
+ * Return: number of characters in line, -1 on fail, -2 on EOF
  */
 long int _getline(char **line, ssize_t *ln_sz, int fd)
 {
-	static long int byt_cnt, crnt_i;
+	static ssize_t byt_cnt, crnt_i;
 	static char buff[BUFFER_SIZE];
-	ssize_t i = 0, rd_sz = 0;
+	ssize_t len = 0;
 
 	if (byt_cnt <= 0)
 	{
 		crnt_i = 0;
-		byt_cnt = 0;
-		_memset(buff, '\0', BUFFER_SIZE);
-		rd_sz = read(fd, buff, BUFFER_SIZE);
-		if (rd_sz > 0)
-			byt_cnt = rd_sz;
-		else if (rd_sz == 0)
-			exit(EXIT_SUCCESS);
-		else
-			return (rd_sz);
+		byt_cnt = byteRd(fd, &buff[0]);
+		if (byt_cnt == -1)
+			return (-1);
+		else if (byt_cnt == 0)
+			return (-2);
 	}
 	else
 	{
-		byt_cnt -= (crnt_i + 1);
+		byt_cnt -= (crnt_i);
 		if (byt_cnt < 1)
-		{
-			*ln_sz = 0;
 			return (0);
-		}
 	}
 
-	i = find_line(buff, crnt_i);
-	if (!(*line) || (*ln_sz < i))
-		*line = mem_line(*line, i);
+	len = find_line(buff, crnt_i, byt_cnt);
+	if (!(*line) || (*ln_sz < len))
+		*line = mem_line(*line, len);
+
 	if (!(*line))
-		return (-2);
-
-	*line = _strncpy(*line, &buff[crnt_i], i);
-	(*line)[i] = '\0';
-	*ln_sz = i;
-	crnt_i += i;
-	if (rd_sz == -1)
+	{
+		*ln_sz = 0;
+		byt_cnt = 0;
 		return (-1);
-	else if (rd_sz == 0)
-		return (0);
+	}
 
-	return (i);
+	*line = _strncpy(*line, &buff[crnt_i], len);
+	(*line)[len] = '\0';
+	*ln_sz = len;
+	crnt_i += len;
+	return (len);
 }
 
 /**
- * find_line - finds the size of a line from a buffer
- * @buff: a buffer containing characters
- * @crnt_i: index to begin searching for line.
+ * byteRd - reads from a file descriptor and returns number of bytes read
+ * @fd: the file descriptor
+ * @buff: address of a buffer to read from
  *
- * Return: Number of bytes in the line
+ * Return: total bytes read if successful, -1 on failure
  */
-ssize_t find_line(char *buff, int crnt_i)
+ssize_t byteRd(int fd, char *buff)
+{
+	ssize_t rd_sz = 0, i = BUFFER_SIZE - 1;
+
+	_memset(buff, '\0', BUFFER_SIZE);
+	rd_sz = read(fd, buff, BUFFER_SIZE);
+	if (!rd_sz)
+	{
+		while (!buff[i] && i >= 0)
+			i -= 1;
+
+		rd_sz = i + 1;
+	}
+
+	return (rd_sz);
+}
+
+/**
+ * find_line - breaks characters in a buffer into lines.
+ * @buff: a buffer containing characters
+ * @crnt_i: starting index
+ * @byt_cnt: position of the last recorded byte in the buffer + 1.
+ *
+ * Return: total bytes in the line
+ */
+ssize_t find_line(char *buff, ssize_t crnt_i, ssize_t byt_cnt)
 {
 	ssize_t i = 0;
 
-	while ((buff[crnt_i + i] != '\n') && ((crnt_i + i) < BUFFER_SIZE - 1))
+	while ((buff[crnt_i + i] != '\n') && (crnt_i + i) < (byt_cnt - 1))
 		i++;
-
-	if ((crnt_i + i) >= BUFFER_SIZE - 1)
-		while (!buff[crnt_i + i])
-			i--;
 
 	return (i + 1);
 }

@@ -5,12 +5,12 @@
  * @cmds: address of an array of pointers
  * @line: string to be parsed
  *
- * Return: number of commands parsed, -1 on failure
+ * Return: an array of pointers to the command and options, NULL on failure
  */
 char **parser(char **cmds, char *line)
 {
 	char *token = NULL;
-	int i = 0;
+	int i = 1;
 	cmd_str *head = NULL, *lst_err = NULL;
 
 	token = _strtok(line, " ");
