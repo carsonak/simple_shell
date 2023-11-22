@@ -1,11 +1,11 @@
 #include "shell.h"
 
 /**
- *_strspn - checks for the first occurences of a set of characters in a string
- *@s: String to be checked
- *@accept: set of characters to check
+ * _strspn - checks the first occurence of a sub-string in a string
+ * @s: String to be checked
+ * @accept: sub-string to check
  *
- *Return: the length of the first occurences
+ * Return: the length of the first occurences
  */
 unsigned int _strspn(char *s, char *accept)
 {
@@ -22,7 +22,7 @@ unsigned int _strspn(char *s, char *accept)
 			}
 		}
 
-		if (accept[j] == '\0')
+		if (!accept[j])
 			break;
 	}
 

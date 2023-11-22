@@ -28,22 +28,26 @@ typedef struct command_string_list
 	struct command_string_list *next;
 } cmd_str;
 
-unsigned long int _strlen(char *s);
+/*standard lib functions replicas*/
+size_t _strlen(char *s);
 unsigned int _strspn(char *s, char *accept);
+size_t _strcspn(char *s, char *reject);
 long int _getline(char **line, ssize_t *ln_sz, int fd);
-ssize_t byteRd(int fd, char *buff);
 ssize_t find_line(char *buff, ssize_t crnt_i, ssize_t byt_cnt);
-char *mem_line(char *line, int sz);
+char *line_alloc(ssize_t len, char *line, char *buff);
 char *_strtok(char *str, char *delim);
 char *_memset(char *s, char c, unsigned int n);
 char *_strncpy(char *dest, char *src, int n);
 char *_strdup(char *str);
-int _strncmp(char *s1, char *s2, unsigned int n);
+int _strncmp(char *s1, char *s2, size_t n);
 char *_strncat(char *dest, char *src, int n);
 char *_getenv(char *name);
+char *str_concat(char *s1, char *s2);
+/*end*/
+int is_EOF(int seteof);
 cmd_str *add_node_end(cmd_str **head, char *str);
 void prompt(void);
-void parse_n_exec(void);
+ssize_t parse_n_exec(void);
 int executor(char **cmds);
 char **parser(char **cmds, char *line);
 void free_list(cmd_str *head);
@@ -51,8 +55,10 @@ void flush_io(void);
 void free_args(char **cmds);
 char **cmds_fill(cmd_str *head, char **cmds);
 int isPath(char **cmd);
-int abs_search(char *path);
-int searchDIR(char *dirPath, char *file);
+int abs_search(char **path);
+int rel_path(char **path);
+int searchDIR(char **dirPath, char *file);
+char *trim_str(char *str, int cut);
 int is_abs_path(char *cmd);
 char *make_path(char *directory, char *file);
 int E_status(int stat);

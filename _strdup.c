@@ -9,17 +9,21 @@
 char *_strdup(char *str)
 {
 	char *cpy = NULL;
-	unsigned long int i = 0;
+	size_t i = 0;
 
 	if (!str)
 		return (NULL);
 
 	cpy = malloc((sizeof(*str) * _strlen(str)) + 1);
 	if (!cpy)
+	{
+		perror("_strdup malloc fail");
 		return (NULL);
+	}
 
-	for (i = 0; i <= _strlen(str); i++)
+	for (i = 0; i < _strlen(str); i++)
 		cpy[i] = str[i];
 
+	cpy[i] = '\0';
 	return (cpy);
 }

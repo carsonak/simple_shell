@@ -11,7 +11,7 @@
  *
  * Return: 1 if file was found, 0 if not found, -1 on error.
  */
-int searchDIR(char *dirPath, char *file)
+int searchDIR(char **dirPath, char *file)
 {
 	DIR *folder = NULL;
 	struct dirent *entry = NULL;
@@ -19,7 +19,7 @@ int searchDIR(char *dirPath, char *file)
 	if (!file)
 		return (abs_search(dirPath));
 
-	folder = opendir(dirPath);
+	folder = opendir(*dirPath);
 	if (folder)
 	{
 		entry = readdir(folder);
@@ -53,26 +53,95 @@ int searchDIR(char *dirPath, char *file)
  *
  * Return: 1 if file was found, 0 if not found, -1 on error.
  */
-int abs_search(char *path)
+int abs_search(char **path)
 {
 	unsigned long int len = 0;
 	int err = 0;
-	char *path_cpy = NULL;
+	char *p_cpy = NULL;
 
-	len = _strlen(path);
-	path_cpy = _strdup(path);
-	if (!path_cpy)
+	if (!rel_path(path))
 		return (-1);
 
-	while (path_cpy[len] != '/')
+	len = _strlen(*path);
+	p_cpy = _strdup(*path);
+	if (!p_cpy)
+		return (-1);
+
+	while (p_cpy[len] != '/')
 		len--;
 
 	if (len)
 	{
-		path_cpy[len] = '\0';
-		err = searchDIR(path_cpy, &path_cpy[len + 1]);
+		p_cpy[len] = '\0';
+		err = searchDIR(&p_cpy, &p_cpy[len + 1]);
 	}
 
-	free(path_cpy);
+	free(p_cpy);
 	return (err);
+}
+
+/**
+ * rel_path - appends the appropriate working directory to a relative path
+ * @path: the path
+ *
+ * Return: 1 on success, 0 on failure
+ */
+int rel_path(char **path)
+{
+	size_t len = 0, spn = 0, i = 0;
+	char *p_cpy = NULL, *cwd = NULL;
+	int j = 0;
+
+	cwd = _getenv("PWD");
+	cwd = _strdup(cwd);
+	p_cpy = _strdup(*path);
+	if (!cwd || !p_cpy)
+		return (0);
+
+	spn = _strspn(p_cpy, "./");
+	for (j = 0; p_cpy[j] && i < spn && spn > 1; j++)
+	{
+		if (!_strncmp("../", &p_cpy[j], 3) || !_strncmp("./", &p_cpy[j], 2))
+		{
+			i += _strcspn(&p_cpy[j], "/") + 1;
+			for (len = (_strlen(cwd) - 1); len && (cwd[len] != '/'); len--)
+				;
+
+			if (cwd[len] == '/' && len && !_strncmp("../", &p_cpy[j], 3))
+				cwd[len] = '\0';
+
+			p_cpy = trim_str(p_cpy, (j + _strcspn(&p_cpy[j], "/") - 1));
+			if (!p_cpy)
+				return (0);
+
+			j = -1;
+		}
+	}
+
+	if (spn > 1)
+	{
+		free(*path);
+		*path = str_concat(cwd, p_cpy);
+	}
+
+	free(cwd);
+	free(p_cpy);
+	return (1);
+}
+
+/**
+ * trim_str - trims a string?
+ * @str: a malloced string
+ * @cut: index to trim at
+ *
+ * Return: pointer to string, NULL on failure
+ */
+char *trim_str(char *str, int cut)
+{
+	char *nwStr = NULL;
+
+	nwStr = _strdup(&str[cut]);
+	free(str);
+
+	return (nwStr);
 }

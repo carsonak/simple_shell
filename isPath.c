@@ -17,7 +17,7 @@ int isPath(char **cmd)
 	int err = 0;
 
 	if (!is_abs_path(*cmd))
-		return (searchDIR(*cmd, NULL));
+		return (searchDIR(cmd, NULL));
 
 	environ = _strdup(_getenv("PATH"));
 	if (!environ)
@@ -26,7 +26,7 @@ int isPath(char **cmd)
 	directory = _strtok(environ, ":");
 	while (directory)
 	{
-		err = searchDIR(directory, *cmd);
+		err = searchDIR(&directory, *cmd);
 		if (err == -1)
 		{
 			free(environ);
@@ -66,6 +66,9 @@ int is_abs_path(char *cmd)
 	err = _strncmp(cmd, "/", 1);
 	if (err)
 		err = _strncmp(cmd, "./", 2);
+
+	if (err)
+		err = _strncmp(cmd, "../", 3);
 
 	return (err);
 }

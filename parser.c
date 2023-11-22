@@ -10,26 +10,33 @@
 char **parser(char **cmds, char *line)
 {
 	char *token = NULL;
-	int i = 1;
+	int i = 1, j = 0;
 	cmd_str *head = NULL, *lst_err = NULL;
 
 	token = _strtok(line, " ");
 	for (i = 1; token; i++)
 	{
-		lst_err = add_node_end(&head, token);
+		if (token[0])
+		{
+			lst_err = add_node_end(&head, token);
+			j++;
+		}
+
 		if (!lst_err)
 			return (NULL);
 
 		token = _strtok(NULL, " ");
 	}
 
-	lst_err = add_node_end(&head, "");
-	free(line);
+	if (j)
+		cmds = malloc(sizeof(*cmds) * (j + 1));
+	else
+		return (NULL);
 
-	cmds = malloc(sizeof(*cmds) * i);
+	lst_err = add_node_end(&head, "");
 	if (!(cmds))
 	{
-		perror("Couldn't allocate memory for commands");
+		perror("parser () memory fail");
 		return (NULL);
 	}
 

@@ -13,19 +13,21 @@ int main(int argc, char *argv[])
 	int err = 0;
 
 	errno = 0;
+	E_status(EXIT_SUCCESS);
 	if (argc == 1)
 	{
-		if (isatty(STDIN_FILENO))
+		while (1)
 		{
-			while (1)
-			{
-				errno = 0;
+			errno = 0;
+			if (is_EOF(-1))
+				break;
+
+			if (isatty(STDIN_FILENO))
 				prompt();
-				parse_n_exec();
-			}
+
+			if (!parse_n_exec())
+				break;
 		}
-		else
-			parse_n_exec();
 	}
 	else
 	{
@@ -46,52 +48,51 @@ int main(int argc, char *argv[])
 
 /**
  * parse_n_exec - parses std input and executes the commands
+ *
+ * Return: number of bytes processed, -1 on failure.
  */
-void parse_n_exec(void)
+ssize_t parse_n_exec(void)
 {
 	char **cmds = NULL, *line = NULL;
-	ssize_t err = 0, ln_sz = 0;
+	ssize_t err = 0, ln_sz = 0, byts = 0;
 
-	while (1)
+	errno = 0;
+	byts = _getline(&line, &ln_sz, STDIN_FILENO);
+	if (byts == -1)
+		perror("_getline() error");
+	else if (line)
 	{
-		errno = 0;
-		line = NULL;
-		err = _getline(&line, &ln_sz, STDIN_FILENO);
-		if (err > 0)
+		if (ln_sz == 1 && line[0] == '\n')
 		{
-			if (ln_sz == 1 && line[0] == '\n')
-			{
-				free(line);
-				return;
-			}
-
-			if (line[ln_sz - 1] == '\n')
-				line[ln_sz - 1] = '\0';
-
-			cmds = parser(cmds, line);
-			if (cmds)
-			{
-				err = isPath(&cmds[0]);
-				if (err == 1)
-					executor(cmds);
-				else if (!err)
-				{
-					write(STDERR_FILENO, "Command not found\n", 19);
-					E_status(127);
-				}
-				else if (err == -1)
-					perror("isPath() failure");
-
-				free_args(cmds);
-			}
+			free(line);
+			return (byts);
 		}
-		else if (!err)
-			break;
-		else if (err == -1)
-			perror("_getline() error");
-		else if (err == -2)
-			exit(E_status(EXIT_SUCCESS));
+
+		if (line[ln_sz - 1] == '\n')
+			line[ln_sz - 1] = '\0';
+		else if (byts)
+			return (byts);
+
+		cmds = parser(cmds, line);
+		if (cmds)
+		{
+			err = isPath(&cmds[0]);
+			if (err == 1)
+				executor(cmds);
+			else if (!err)
+			{
+				write(STDERR_FILENO, "Command not found\n", 19);
+				E_status(127);
+			}
+			else if (err == -1)
+				perror("isPath() failure");
+
+			free_args(cmds);
+		}
+		free(line);
 	}
+
+	return (byts);
 }
 
 /**
