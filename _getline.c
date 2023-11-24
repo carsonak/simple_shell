@@ -33,7 +33,7 @@ long int _getline(char **line, ssize_t *ln_sz, int fd)
 	}
 
 	len = find_line(buff, crnt_i, byt_cnt);
-	*line = line_alloc(len, *line, &buff[0]);
+	*line = line_alloc(len, *line, &buff[crnt_i]);
 	if (!(*line))
 		return (-1);
 

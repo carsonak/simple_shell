@@ -63,13 +63,11 @@ ssize_t parse_n_exec(void)
 		if (ln_sz == 1 && line[0] == '\n')
 		{
 			free(line);
-			return (byts);
+			return (ln_sz);
 		}
 
 		if (line[ln_sz - 1] == '\n')
 			line[ln_sz - 1] = '\0';
-		else if (byts)
-			return (byts);
 
 		cmds = parser(cmds, line);
 		if (cmds)

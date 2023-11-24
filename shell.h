@@ -65,5 +65,6 @@ char *trim_str(char *str, int cut);
 int is_abs_path(char *cmd);
 char *make_path(char *directory, char *file);
 int E_status(char *prog_name, int stat, char *cmd);
+int badbad(char *prog_name, char **msg, char *cnt_s, char *cmd, char *panic);
 
 #endif /*_SHELL_H_*/
