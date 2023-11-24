@@ -118,7 +118,6 @@ int rel_path(char **path)
 			j = -1;
 		}
 	}
-
 	if (spn > 1)
 	{
 		free(*path);
