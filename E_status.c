@@ -65,7 +65,7 @@ int badbad(char *prog_name, char **msg, char *cnt_s, char *cmd, char *panic)
 {
 	*msg = stringscat(6, prog_name, ": ", cnt_s, ": ", cmd, panic);
 	if (*msg)
-		write(STDOUT_FILENO, *msg, _strlen(*msg));
+		write(STDERR_FILENO, *msg, _strlen(*msg));
 	else
 	{
 		perror("E_status failure");
