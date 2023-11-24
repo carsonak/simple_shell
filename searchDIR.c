@@ -61,7 +61,9 @@ int abs_search(char **path)
 	int err = 0;
 	char *p_cpy = NULL;
 
-	if (!rel_path(path))
+	if (!_getenv("PWD"))
+		return (0);
+	else if (!rel_path(path))
 		return (-1);
 
 	len = _strlen(*path);
