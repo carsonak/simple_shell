@@ -110,7 +110,7 @@ int rel_path(char **path)
 			if (cwd[len] == '/' && len && !_strncmp("../", &p_cpy[j], 3))
 				cwd[len] = '\0';
 
-			p_cpy = trim_str(p_cpy, (j + _strcspn(&p_cpy[j], "/") - 1));
+			p_cpy = trim_str(p_cpy, (j + _strcspn(&p_cpy[j], "/")));
 			if (!p_cpy)
 				return (0);
 

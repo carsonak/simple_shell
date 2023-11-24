@@ -58,11 +58,11 @@ char *str_concat(char *s1, char *s2)
 		return (NULL);
 
 	if (s1)
-		for (i = 0; s1[i]; i++, j++)
+		for (i = 0; s1[i] != '\0'; i++, j++)
 			bGstr[j] = s1[i];
 
 	if (s2)
-		for (i = 0; s2[i]; i++, j++)
+		for (i = 0; s2[i] != '\0'; i++, j++)
 			bGstr[j] = s2[i];
 
 	if (j)
