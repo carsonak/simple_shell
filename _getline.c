@@ -17,62 +17,35 @@ long int _getline(char **line, ssize_t *ln_sz, int fd)
 	static char buff[BUFFER_SIZE];
 	ssize_t len = 0;
 
-	if (byt_cnt <= 0)
+	if (byt_cnt < 1)
 	{
 		crnt_i = 0;
-		byt_cnt = byteRd(fd, &buff[0]);
+		_memset(buff, '\0', BUFFER_SIZE);
+		byt_cnt = read(fd, buff, BUFFER_SIZE);
 		if (byt_cnt == -1)
 			return (-1);
-		else if (byt_cnt == 0)
-			return (-2);
-	}
-	else
-	{
-		byt_cnt -= (crnt_i);
-		if (byt_cnt < 1)
+		else if (!byt_cnt)
+		{
+			is_EOF(1);
+			*ln_sz = len;
 			return (0);
+		}
 	}
 
 	len = find_line(buff, crnt_i, byt_cnt);
-	if (!(*line) || (*ln_sz < len))
-		*line = mem_line(*line, len);
-
+	*line = line_alloc(len, *line, &buff[0]);
 	if (!(*line))
-	{
-		*ln_sz = 0;
-		byt_cnt = 0;
 		return (-1);
-	}
 
-	*line = _strncpy(*line, &buff[crnt_i], len);
-	(*line)[len] = '\0';
 	*ln_sz = len;
 	crnt_i += len;
-	return (len);
-}
-
-/**
- * byteRd - reads from a file descriptor and returns number of bytes read
- * @fd: the file descriptor
- * @buff: address of a buffer to read from
- *
- * Return: total bytes read if successful, -1 on failure
- */
-ssize_t byteRd(int fd, char *buff)
-{
-	ssize_t rd_sz = 0, i = BUFFER_SIZE - 1;
-
-	_memset(buff, '\0', BUFFER_SIZE);
-	rd_sz = read(fd, buff, BUFFER_SIZE);
-	if (!rd_sz)
+	if (byt_cnt <= crnt_i)
 	{
-		while (!buff[i] && i >= 0)
-			i -= 1;
-
-		rd_sz = i + 1;
+		byt_cnt = 0;
+		return (0);
 	}
 
-	return (rd_sz);
+	return (len);
 }
 
 /**
@@ -94,17 +67,43 @@ ssize_t find_line(char *buff, ssize_t crnt_i, ssize_t byt_cnt)
 }
 
 /**
- * mem_line - allocates memory for a string
- * @line: a buffer
- * @sz: size in bytes to be allocated
+ * line_alloc - concatenates strings from _getline
+ * @len: number of bytes to read from the input buffer
+ * @line: line without a '\n'
+ * @buff: input buffer from _getline
  *
- * Return: pointer to allocated memory, NULL on failure
+ * Return: pointer to the concatenated string, NULL on failure
  */
-char *mem_line(char *line, int sz)
+char *line_alloc(ssize_t len, char *line, char *buff)
 {
-	if (line)
-		free(line);
+	char *str = NULL, *ln_cpy = line;
 
-	line = malloc((sizeof(*line) * sz) + 1);
+	str = malloc((sizeof(*str) * len) + 1);
+	if (!str)
+		return (NULL);
+
+	str = _strncpy(str, buff, len);
+	str[len] = '\0';
+	line = str_concat(line, str);
+	if (ln_cpy)
+		free(ln_cpy);
+
+	free(str);
 	return (line);
+}
+
+/**
+ * is_EOF - records EOF value from read
+ * @seteof: an int used to set or check EOF
+ *
+ * Return: +ve int if EOF, 0 if false
+ */
+int is_EOF(int seteof)
+{
+	static int isEOF;
+
+	if (seteof != -1)
+		isEOF = seteof;
+
+	return (isEOF);
 }

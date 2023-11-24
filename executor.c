@@ -20,26 +20,16 @@ int executor(char **cmds)
 	{
 		err = execve(cmds[0], cmds, nwenviron);
 		if (err == -1)
-		{
-			perror("Couldn't execute");
-			exit(E_status(EXIT_FAILURE));
-		}
+			exit(E_status(NULL, EXIT_FAILURE, NULL));
 	}
 	else
 	{
 		frkerr = waitpid(frk1, &status, 0);
 		if (frkerr == -1)
 			perror("Wait error");
-		/**
-		 * else
-		 * {
-		 *	if (WIFEXITED(status))
-		 *	dprintf(STDERR_FILENO, "%d: Status %d\n", frkerr, WEXITSTATUS(status));
-		 *	else
-		 *		dprintf(STDERR_FILENO, "%d: Exited abnormally", frkerr);
-		 * }
-		 */
+		else
+			return (E_status(NULL, WEXITSTATUS(status), cmds[0]));
 	}
 
-	return (E_status(EXIT_SUCCESS));
+	return (E_status(NULL, EXIT_SUCCESS, NULL));
 }

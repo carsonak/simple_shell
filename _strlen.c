@@ -6,9 +6,9 @@
  *
  *Return: length of the string
  */
-unsigned long int _strlen(char *s)
+size_t _strlen(char *s)
 {
-	unsigned long int cnt;
+	size_t cnt;
 
 	for (cnt = 0; s[cnt]; cnt++)
 		;
