@@ -9,14 +9,18 @@
  */
 size_t _strcspn(char *s, char *reject)
 {
-	size_t i, r = 0;
+	size_t i, j, r = 0;
 
 	for (i = 0; s[i]; i++)
 	{
-		if (reject[i] == s[i])
-			break;
+		for (j = 0; reject[j]; j++)
+			if (reject[j] == s[i])
+				break;
 
-		r++;
+		if (!reject[j])
+			r++;
+		else
+			break;
 	}
 
 	return (r);

@@ -1,6 +1,39 @@
 #include "shell.h"
 
 /**
+ * stringscat - concatenates a variable number of strings
+ * @items: the number of strings to be concatenated
+ *
+ * Return: pointer to the resultant string, NULL on failure
+ */
+char *stringscat(size_t items, ...)
+{
+	va_list ptr;
+	char *s1 = NULL, *s2 = NULL;
+	size_t i = items;
+
+	if (!items)
+		return (malloc(sizeof(*s1)));
+
+	va_start(ptr, items);
+	while (i)
+	{
+		s2 = s1;
+		s1 = str_concat(s2, va_arg(ptr, char *));
+		if (s2)
+			free(s2);
+
+		if (!s1)
+			break;
+
+		i--;
+	}
+
+	va_end(ptr);
+	return (s1);
+}
+
+/**
  * str_concat - concatinates 2 strings and stores them in a new array.
  * @s1: 1st string
  * @s2: 2nd string

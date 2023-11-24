@@ -98,6 +98,7 @@ int rel_path(char **path)
 	if (!cwd || !p_cpy)
 		return (0);
 
+	printf("[path]: %s\n[pwd]: %s\n\n", *path, cwd);
 	spn = _strspn(p_cpy, "./");
 	for (j = 0; p_cpy[j] && i < spn && spn > 1; j++)
 	{
@@ -124,6 +125,7 @@ int rel_path(char **path)
 		*path = str_concat(cwd, p_cpy);
 	}
 
+	printf("[path]: %s\n[pwd]: %s\n\n", *path, cwd);
 	free(cwd);
 	free(p_cpy);
 	return (1);

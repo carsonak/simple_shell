@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	int err = 0;
 
 	errno = 0;
-	E_status(EXIT_SUCCESS);
+	E_status(argv[0], EXIT_SUCCESS, NULL);
 	if (argc == 1)
 	{
 		while (1)
@@ -36,14 +36,12 @@ int main(int argc, char *argv[])
 		if (err == 1)
 			executor(cmds);
 		else if (!err)
-		{
-			write(STDERR_FILENO, "Command not found\n", 19);
-			E_status(127);
-		}
+			E_status(NULL, 127, cmds[0]);
 		else if (err == -1)
-			perror("isPath() failure");
+			E_status(NULL, 126, cmds[0]);
 	}
-	return (E_status(1000));
+
+	return (E_status(NULL, -1, NULL));
 }
 
 /**
@@ -80,19 +78,16 @@ ssize_t parse_n_exec(void)
 			if (err == 1)
 				executor(cmds);
 			else if (!err)
-			{
-				write(STDERR_FILENO, "Command not found\n", 19);
-				E_status(127);
-			}
+				E_status(NULL, 127, cmds[0]);
 			else if (err == -1)
-				perror("isPath() failure");
+				E_status(NULL, 126, cmds[0]);
 
 			free_args(cmds);
 		}
 		free(line);
 	}
 
-	return (byts);
+	return (ln_sz);
 }
 
 /**
@@ -103,6 +98,6 @@ void prompt(void)
 	if (write(STDOUT_FILENO, "$!", 2) == -1)
 	{
 		perror("Whoops");
-		exit(E_status(EXIT_FAILURE));
+		exit(E_status(NULL, EXIT_FAILURE, NULL));
 	}
 }

@@ -27,6 +27,7 @@ long int _getline(char **line, ssize_t *ln_sz, int fd)
 		else if (!byt_cnt)
 		{
 			is_EOF(1);
+			*ln_sz = len;
 			return (0);
 		}
 	}
