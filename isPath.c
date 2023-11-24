@@ -16,12 +16,12 @@ int isPath(char **cmd)
 	char *environ = NULL, *directory = NULL;
 	int err = 0;
 
-	if (!is_abs_path(*cmd))
-		return (searchDIR(cmd, NULL));
-
 	environ = _strdup(_getenv("PATH"));
 	if (!environ)
-		return (-1);
+		return (0);
+
+	if (!is_abs_path(*cmd))
+		return (searchDIR(cmd, NULL));
 
 	directory = _strtok(environ, ":");
 	while (directory)

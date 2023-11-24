@@ -16,8 +16,10 @@ int searchDIR(char **dirPath, char *file)
 	DIR *folder = NULL;
 	struct dirent *entry = NULL;
 
-	if (!file)
+	if (!file && (*dirPath)[0] != '/')
 		return (abs_search(dirPath));
+	else if (!file && (*dirPath)[0] == '/')
+		return (1);
 
 	folder = opendir(*dirPath);
 	if (folder)
