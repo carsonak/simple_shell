@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	int err = 0;
 
 	errno = 0;
-	E_status(argv[0], EXIT_SUCCESS, NULL);
+	err_handler(argv[0], EXIT_SUCCESS, NULL);
 	if (argc == 1)
 	{
 		while (1)
@@ -36,12 +36,12 @@ int main(int argc, char *argv[])
 		if (err == 1)
 			executor(cmds);
 		else if (!err)
-			E_status(NULL, 127, cmds[0]);
+			err_handler(NULL, 127, cmds[0]);
 		else if (err == -1)
-			E_status(NULL, 126, cmds[0]);
+			err_handler(NULL, 126, cmds[0]);
 	}
 
-	return (E_status(NULL, -1, NULL));
+	return (err_handler(NULL, -1, NULL));
 }
 
 /**
@@ -76,9 +76,9 @@ ssize_t parse_n_exec(void)
 			if (err == 1)
 				executor(cmds);
 			else if (!err)
-				E_status(NULL, 127, cmds[0]);
+				err_handler(NULL, 127, cmds[0]);
 			else if (err == -1)
-				E_status(NULL, 126, cmds[0]);
+				perror("isPath() failure");
 
 			free_args(cmds);
 		}
@@ -96,6 +96,6 @@ void prompt(void)
 	if (write(STDOUT_FILENO, "$!", 2) == -1)
 	{
 		perror("Whoops");
-		exit(E_status(NULL, EXIT_FAILURE, NULL));
+		exit(err_handler(NULL, EXIT_FAILURE, NULL));
 	}
 }

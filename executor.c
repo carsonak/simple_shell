@@ -20,7 +20,7 @@ int executor(char **cmds)
 	{
 		err = execve(cmds[0], cmds, nwenviron);
 		if (err == -1)
-			exit(E_status(NULL, EXIT_FAILURE, NULL));
+			exit(err_handler(NULL, EXIT_FAILURE, NULL));
 	}
 	else
 	{
@@ -28,8 +28,8 @@ int executor(char **cmds)
 		if (frkerr == -1)
 			perror("Wait error");
 		else
-			return (E_status(NULL, WEXITSTATUS(status), cmds[0]));
+			return (err_handler(NULL, WEXITSTATUS(status), cmds[0]));
 	}
 
-	return (E_status(NULL, EXIT_SUCCESS, NULL));
+	return (err_handler(NULL, EXIT_SUCCESS, NULL));
 }

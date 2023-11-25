@@ -21,7 +21,7 @@ int isPath(char **cmd)
 
 	environ = _strdup(_getenv("PATH"));
 	if (!environ)
-		return (-1);
+		return (0);
 
 	directory = _strtok(environ, ":");
 	while (directory)
