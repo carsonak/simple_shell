@@ -14,14 +14,11 @@ CFILES := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)*.c))
 OBJ_FILES := $(patsubst $(dir $(CFILES))%.c, $(OBJ_DIR)%.o, $(CFILES))
 DEP_FILES := $(patsubst $(dir $(OBJ_FILES))%.o, $(DEP_DIR)%.d, $(CFILES))
 
-# .PHONY so that the rules work even if a file with the same target-name exists.
-.PHONY: all clean distribute diff $(SRC_DIR) $(INCL_DIR)
-
 # Include the dependencies
--include $(DEP_FILES)
+-include $(DEP_FILES) $(INCL_DIR)
 
 # First rule that will be run by make on default
-all: $(BINARY) create-dirs
+all: create-dirs $(BINARY)
 
 # Rule for compiling a final executable file
 # $@ - the target. $^ - the prerequisites
@@ -30,7 +27,7 @@ $(BINARY): $(OBJ_FILES)
 
 # Rule for creating folders if they don't exist
 # @ silences the printing of the command
-crt-dirs:
+create-dirs:
 	@mkdir -p $(OBJ_DIR) $(DEP_DIR)
 
 # Redifing implicit rule for making object files
@@ -55,3 +52,6 @@ diff:
 # Make a copy of all source codes into the parent folder
 cpy-src:
 	@cp -fu $(CFILES) *.h Makefile ../
+
+# .PHONY so that the rules work even if a file with the same target-name exists.
+.PHONY: all clean distribute diff $(SRC_DIR) $(INCL_DIR)
