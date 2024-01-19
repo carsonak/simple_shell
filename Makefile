@@ -1,7 +1,7 @@
-#!/usr/bin/make -f
+#!/usr/bin/make
 
 BINARY := ./s_sh # Final binary executable
-SRC_DIR := ./
+SRC_DIR := ./scrap
 LIB_DIR := lib/ # Library directories
 BUILD_DIR := ./build # Directory to place object files
 CC := gcc # Compiler
@@ -15,26 +15,22 @@ INCL_DIRS := $(shell find $(SRC_DIR) -type d) # Directories to search fo header 
 INCL_FLAGS := $(addprefix -I,$(INCL_DIRS)) # Include flags for all directories
 
 SRC_FILES := $(shell find $(SRC_DIR) -name '*.c') # All the source files
-OBJ_FILES := $(SRC_FILES:%.c=$(BUILD_DIR)/%.o) # Object files stored in ./build
+OBJ_FILES := $(SRC_FILES:$(notdir %.c)=$(BUILD_DIR)/%.o) # Object files stored in ./build
 DEP_FILES := $(OBJ_FILES:.o=.d) # Dependency files for make
 
 CFLAGS := $(INCL_FLAGS) -std=c17 $(WARN_FLAGS) $(F_FLAGS) -g $(DEP_FLAGS)
 
-# Include the dependencies
--include $(DEP_FILES)
-
 # First rule that will be run by make on default
-all: build-dirs $(BINARY)
+all: $(BINARY)
 
 # Rule for compiling a final executable file
 # $@ - the target. $^ - the prerequisites
-$(BINARY): $(OBJ_FILES)
-	$(CC) $^ -o $@
+$(BINARY): $(OBJ_FILES) $(BUILD_DIR)
+	$(CC) $^ -o $@ $(LNK_FLAGS)
 
-# Rule for creating folders if they don't exist
-# @ silences the printing of the command
-build-dirs:
-	@mkdir $(BUILD_DIR)
+# Create folder if it don't exist
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
 
 # Redifing implicit rule for making object files
 # $< - only the first prerequisite
@@ -42,22 +38,16 @@ build-dirs:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Removes all obj and dep files and their folders plus the binary file
+# @ silences the printing of the command
 clean:
-	@rm -drf --preserve-root $(BINARY) $(OBJ_FILES) $(DEP_FILES) $(OBJ_DIR) $(DEP_DIR)
+	@rm -rd --preserve-root $(BUILD_DIR)
 
-# shell commands are a set of keystrokes away
-distribute: clean
-	tar zcvf dist.tgz *
-
-# $(info ...) prints to output
-diff:
-	$(info Repository status and per-file changes:)
-	git status
-	@git diff --stat
-
-# Make a copy of all source codes into the parent folder
+# Make a copy of all source codes, header files and Makefile into a back_up folder
 cpy-src:
-	@cp -fu $(SRC_FILES) *.h Makefile ../
+	@cp -fu $(SRC_FILES) $(shell find $(SRC_DIR) -name '*.h') Makefile ./back_up
 
 # .PHONY so that the rules work even if a file with the same target-name exists.
-.PHONY: all clean distribute diff $(SRC_DIR) $(INCL_DIR)
+.PHONY: all clean cpy-src $(BUILD_DIR)
+
+# Include the dependencies
+-include $(DEP_FILES)
