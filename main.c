@@ -29,6 +29,9 @@ int main(int argc, char *argv[])
 			executor(cl_args);
 		else if (err == 0)
 			err_handler(NULL, 127, cl_args[0]);
+
+		if ((void *)argv[1] != (void *)cl_args[0])
+			free(cl_args[0]);
 	}
 
 	return (err_handler(NULL, -1, NULL));
@@ -58,9 +61,10 @@ void inatty(void)
 				err = isPath(&cmd_arr[0]);
 				if (err == 1)
 				{
+					if ((void *)cmd_arr[0] != (void *)cmd_cpy)
+						free(cmd_cpy);
+
 					executor(cmd_arr);
-					free(cmd_cpy);
-					cmd_cpy = NULL;
 				}
 				else if (err == 0)
 					err_handler(NULL, 127, cmd_arr[0]);
@@ -99,9 +103,10 @@ void notatty(void)
 				err = isPath(&cmd_arr[0]);
 				if (err == 1)
 				{
+					if ((void *)cmd_arr[0] != (void *)cmd_cpy)
+						free(cmd_cpy);
+
 					executor(cmd_arr);
-					free(cmd_cpy);
-					cmd_cpy = NULL;
 				}
 				else if (err == 0)
 					err_handler(NULL, 127, cmd_arr[0]);

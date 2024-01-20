@@ -2,7 +2,7 @@
 
 # Final binary executable
 BINARY := ./s_sh
-SRC_DIR := ./src_sh
+SRC_DIR := ./
 # Library directories
 LIB_DIR := lib/
 # Directory to place object files
