@@ -9,7 +9,7 @@
  */
 int main(int argc, char *argv[])
 {
-	char **cmds = NULL;
+	char **cl_args = NULL;
 	int err = 0;
 
 	errno = 0;
@@ -23,11 +23,12 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		err = isPath(&argv[1]);
+		cl_args = &argv[1];
+		err = isPath(cl_args);
 		if (err == 1)
-			executor(&argv[1]);
+			executor(cl_args);
 		else if (err == 0)
-			err_handler(NULL, 127, &argv[1]);
+			err_handler(NULL, 127, cl_args[0]);
 	}
 
 	return (err_handler(NULL, -1, NULL));

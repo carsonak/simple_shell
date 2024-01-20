@@ -39,13 +39,17 @@ char *line_alloc(ssize_t len, char *buff);
 char *_getenv(char *name);
 /*end*/
 
-char *lintos(ssize_t num);
-cmd_str *add_node_end(cmd_str **head, char *str);
+void inatty(void);
+void notatty(void);
 void prompt(void);
-ssize_t parse_n_exec(void);
-int executor(char **cmds);
-char **parser(char *line);
+char *lintos(ssize_t num);
+
+cmd_str *add_node_end(cmd_str **head, char *str);
 void free_list(cmd_str *head);
+
+char **parser(char *line);
+int executor(char **cmds);
+
 void flush_io(void);
 void free_args(char **cmds);
 char **cmd_fill(cmd_str *head, char **cmds);

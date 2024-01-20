@@ -13,7 +13,7 @@ size_t pad_char(char *str, char *ch)
 
 	if (str)
 	{
-		pc = strspn(str, ch);
+		pc = _strspn(str, ch);
 		if (pc && !str[pc])
 			pc--;
 	}

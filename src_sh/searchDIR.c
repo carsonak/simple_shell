@@ -99,9 +99,8 @@ int abs_search(char **path)
  */
 char *append_dir(char *path, char *cwd)
 {
-	size_t c_i = 0, spn = 0, i = 0;
+	size_t c_i = 0, spn = 0;
 	char *p_cpy = NULL;
-	int j = 0;
 
 	spn = _strspn(path, "./");
 	if (spn < 2)
@@ -117,7 +116,7 @@ char *append_dir(char *path, char *cwd)
 	if (cwd[c_i] == '/')
 		cwd[c_i] = '\0';
 
-	if (spn && (pad_char(path, '.') > 1))
+	if (spn && (pad_char(path, ".") > 1))
 	{
 		while (c_i > 0 && cwd[c_i] != '/')
 			c_i--;

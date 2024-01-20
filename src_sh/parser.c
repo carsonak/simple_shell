@@ -57,7 +57,7 @@ char **parser(char *line)
  */
 char **cmd_fill(cmd_str *head, char **cmd)
 {
-	size_t i = 0, j = 0;
+	size_t i = 0;
 	cmd_str *walk = head;
 
 	if (!cmd)
