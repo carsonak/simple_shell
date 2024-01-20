@@ -32,21 +32,19 @@ int isPath(char **cmd)
 			free(environ);
 			return (-1);
 		}
-		else if (err == 1)
+
+		if (err == 1)
 			break;
 
 		directory = _strtok(NULL, ":");
 	}
 
+	free(environ);
 	if (directory)
 		*cmd = make_path(directory, *cmd);
 	else
-	{
-		free(environ);
 		return (0);
-	}
 
-	free(environ);
 	if (errno || !(*cmd))
 		return (-1);
 
@@ -54,23 +52,23 @@ int isPath(char **cmd)
 }
 
 /**
- * is_abs_path - checks if the first character/s of cmd is "/" or "./"
+ * is_abs_path - check if first character/s of cmd are "/" or "./" or "../"
  * @cmd: the string to be checked
  *
  * Return: 0 if is absolute pathname, a +/- int if not
  */
 int is_abs_path(char *cmd)
 {
-	int err = 0;
+	int diff = 0;
 
-	err = _strncmp(cmd, "/", 1);
-	if (err)
-		err = _strncmp(cmd, "./", 2);
+	diff = _strncmp(cmd, "/", 1);
+	if (diff)
+		diff = _strncmp(cmd, "./", 2);
 
-	if (err)
-		err = _strncmp(cmd, "../", 3);
+	if (diff)
+		diff = _strncmp(cmd, "../", 3);
 
-	return (err);
+	return (diff);
 }
 
 /**
@@ -87,10 +85,9 @@ char *make_path(char *directory, char *file)
 	path = malloc(sizeof(*directory) * (_strlen(directory) + _strlen(file)) + 2);
 	if (path)
 	{
-		path = _strncpy(path, directory, (_strlen(directory) + 1));
-		path = _strncat(path, "/", 2);
-		path = _strncat(path, file, (_strlen(file) + 1));
-		free(file);
+		_strncpy(path, directory, (_strlen(directory) + 1));
+		_strncat(path, "/", 2);
+		_strncat(path, file, (_strlen(file) + 1));
 	}
 	else
 		return (NULL);

@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "u_string.h"
 
 /**
  *_strncpy - copies a string with at most n characters to dest.
@@ -8,9 +8,9 @@
  *
  * Return: pointer to the result buffer.
  */
-char *_strncpy(char *dest, char *src, int n)
+char *_strncpy(char *dest, char *src, size_t n)
 {
-	long int i, l = _strlen(src);
+	size_t i, l = _strlen(src);
 
 	for (i = 0; i < n; i++)
 	{

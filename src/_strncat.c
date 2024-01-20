@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "u_string.h"
 
 /**
  *_strncat - concatinates 2 strings with at most n characters from src.
@@ -8,9 +8,9 @@
  *
  * Return: pointer to the result string.
  */
-char *_strncat(char *dest, char *src, int n)
+char *_strncat(char *dest, char *src, size_t n)
 {
-	int i = 0, j = 0;
+	size_t i = 0, j = 0;
 
 	for (i = 0; dest[i]; i++)
 		;

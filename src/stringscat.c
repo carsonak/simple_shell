@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "u_string.h"
 
 /**
  * stringscat - concatenates a variable number of strings
@@ -13,7 +13,7 @@ char *stringscat(size_t items, ...)
 	size_t i = items;
 
 	if (!items)
-		return (malloc(sizeof(*s1)));
+		return (NULL);
 
 	va_start(ptr, items);
 	while (i)
@@ -42,20 +42,23 @@ char *stringscat(size_t items, ...)
  */
 char *str_concat(char *s1, char *s2)
 {
-	char *bGstr = "";
+	char *bGstr = NULL;
 	size_t i = 0, j = 0;
 
-	if (!s1 && !s2)
-		return (malloc(sizeof(*bGstr)));
+	if (s1 && s2)
+		bGstr = malloc((sizeof(*bGstr) * (_strlen(s1) + _strlen(s2))) + 1);
 	else if (!s1 && s2)
 		bGstr = malloc((sizeof(*bGstr) * _strlen(s2)) + 1);
 	else if (s1 && !s2)
 		bGstr = malloc((sizeof(*bGstr) * _strlen(s1)) + 1);
 	else
-		bGstr = malloc((sizeof(*bGstr) * (_strlen(s1) + _strlen(s2))) + 1);
+		bGstr = malloc(sizeof(*bGstr));
 
 	if (!bGstr)
+	{
+		perror("str_concat: Malloc fail");
 		return (NULL);
+	}
 
 	if (s1)
 		for (i = 0; s1[i] != '\0'; i++, j++)
@@ -65,8 +68,6 @@ char *str_concat(char *s1, char *s2)
 		for (i = 0; s2[i] != '\0'; i++, j++)
 			bGstr[j] = s2[i];
 
-	if (j)
-		bGstr[j] = '\0';
-
+	bGstr[j] = '\0';
 	return (bGstr);
 }

@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "u_string.h"
 
 /**
  * _strcspn - checks the first occurence of a sub-string in a string

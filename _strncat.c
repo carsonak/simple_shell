@@ -8,20 +8,16 @@
  *
  * Return: pointer to the result string.
  */
-char *_strncat(char *dest, char *src, int n)
+char *_strncat(char *dest, char *src, size_t n)
 {
-	int i = 0, j = 0;
+	size_t i = 0, j = 0;
 
 	for (i = 0; dest[i]; i++)
 		;
 
-	j = 0;
-	while (j < n && src[j] != '\0')
-	{
+	for (j = 0; j < n && src[j] != '\0'; i++, j++)
 		dest[i] = src[j];
-		i++;
-		j++;
-	}
+
 	dest[i] = '\0';
 
 	return (dest);

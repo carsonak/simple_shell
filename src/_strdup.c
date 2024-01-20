@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "u_string.h"
 
 /**
  * _strdup - duplicates a string (allocates new memory for the copy)
@@ -9,21 +9,21 @@
 char *_strdup(char *str)
 {
 	char *cpy = NULL;
-	size_t i = 0;
+	size_t i = 0, len = 0;
 
 	if (!str)
 		return (NULL);
 
-	cpy = malloc((sizeof(*str) * _strlen(str)) + 1);
+	len = _strlen(str);
+	cpy = malloc((sizeof(*str) * len) + 1);
 	if (!cpy)
 	{
-		perror("_strdup malloc fail");
+		perror("_strdup: malloc fail");
 		return (NULL);
 	}
 
-	for (i = 0; i < _strlen(str); i++)
+	for (i = 0; i <= len; i++)
 		cpy[i] = str[i];
 
-	cpy[i] = '\0';
 	return (cpy);
 }

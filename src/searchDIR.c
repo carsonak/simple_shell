@@ -16,14 +16,18 @@ int searchDIR(char **dirPath, char *file)
 	DIR *folder = NULL;
 	struct dirent *entry = NULL;
 
-	if (!file && (*dirPath)[0] != '/')
-		return (abs_search(dirPath));
-	else if (!file && (*dirPath)[0] == '/')
-		return (1);
+	if (!file)
+	{
+		if ((*dirPath)[0] == '/')
+			return (1);
+		else
+			return (abs_search(dirPath));
+	}
 
 	folder = opendir(*dirPath);
 	if (folder)
 	{
+		errno = 0;
 		entry = readdir(folder);
 		while (entry)
 		{
@@ -36,7 +40,7 @@ int searchDIR(char **dirPath, char *file)
 			entry = readdir(folder);
 		}
 
-		if ((entry == NULL) && (errno != 0))
+		if (!entry && errno)
 		{
 			closedir(folder);
 			return (-1);
@@ -51,26 +55,26 @@ int searchDIR(char **dirPath, char *file)
 
 /**
  * abs_search - checks if an absolute pathname exists
- * @path: the absolute pathname
+ * @path: pointer to the absolute pathname
  *
  * Return: 1 if file was found, 0 if not found, -1 on error.
  */
 int abs_search(char **path)
 {
-	unsigned long int len = 0;
+	char *p_cpy = NULL, *cwd = NULL;
+	size_t len = 0;
 	int err = 0;
-	char *p_cpy = NULL;
 
-	if (!_getenv("PWD"))
-		return (0);
-	else if (!rel_path(path))
+	cwd = _getenv("PWD");
+	cwd = _strdup(cwd);
+	if (!cwd || path)
 		return (-1);
 
-	len = _strlen(*path);
-	p_cpy = _strdup(*path);
+	p_cpy = append_dir(*path, cwd);
 	if (!p_cpy)
 		return (-1);
 
+	len = _strlen(p_cpy);
 	while (p_cpy[len] != '/')
 		len--;
 
@@ -78,74 +82,49 @@ int abs_search(char **path)
 	{
 		p_cpy[len] = '\0';
 		err = searchDIR(&p_cpy, &p_cpy[len + 1]);
+		p_cpy[len] = '/';
 	}
 
-	free(p_cpy);
+	free(*path);
+	*path = p_cpy;
 	return (err);
 }
 
 /**
- * rel_path - appends the appropriate working directory to a relative path
- * @path: the path
+ * append_dir - append appropriate directory to a relative path
+ * @path: the relative path
+ * @cwd: current working directory
  *
- * Return: 1 on success, 0 on failure
+ * Return: the full path on success, NULL on failure
  */
-int rel_path(char **path)
+char *append_dir(char *path, char *cwd)
 {
-	size_t len = 0, spn = 0, i = 0;
-	char *p_cpy = NULL, *cwd = NULL;
+	size_t c_i = 0, spn = 0, i = 0;
+	char *p_cpy = NULL;
 	int j = 0;
 
-	cwd = _getenv("PWD");
-	cwd = _strdup(cwd);
-	p_cpy = _strdup(*path);
-	if (!cwd || !p_cpy)
-		return (0);
+	spn = _strspn(path, "./");
+	if (spn < 2)
+		spn = 0;
+	else if (spn > 3)
+		spn = 3;
 
-	spn = _strspn(p_cpy, "./");
-	for (j = 0; p_cpy[j] && i < spn && spn > 1; j++)
+	p_cpy = _strdup(path + spn);
+	if (!cwd || !p_cpy || path[0] == '/')
+		return (NULL);
+
+	c_i = (_strlen(cwd) - 1);
+	if (cwd[c_i] == '/')
+		cwd[c_i] = '\0';
+
+	if (spn && (pad_char(path, '.') > 1))
 	{
-		if (!_strncmp("../", &p_cpy[j], 3) || !_strncmp("./", &p_cpy[j], 2))
-		{
-			i += _strcspn(&p_cpy[j], "/") + 1;
-			for (len = (_strlen(cwd) - 1); len && (cwd[len] != '/'); len--)
-				;
+		while (c_i > 0 && cwd[c_i] != '/')
+			c_i--;
 
-			if (cwd[len] == '/' && len && !_strncmp("../", &p_cpy[j], 3))
-				cwd[len] = '\0';
-
-			p_cpy = trim_str(p_cpy, (j + _strcspn(&p_cpy[j], "/")));
-			if (!p_cpy)
-				return (0);
-
-			j = -1;
-		}
+		if (c_i)
+			cwd[c_i] = '\0';
 	}
 
-	if (spn > 1)
-	{
-		free(*path);
-		*path = str_concat(cwd, p_cpy);
-	}
-
-	free(cwd);
-	free(p_cpy);
-	return (1);
-}
-
-/**
- * trim_str - trims a string?
- * @str: a malloced string
- * @cut: index to trim at
- *
- * Return: pointer to string, NULL on failure
- */
-char *trim_str(char *str, int cut)
-{
-	char *nwStr = NULL;
-
-	nwStr = _strdup(&str[cut]);
-	free(str);
-
-	return (nwStr);
+	return (stringscat(2, cwd, p_cpy));
 }
