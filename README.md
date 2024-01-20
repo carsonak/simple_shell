@@ -1,13 +1,18 @@
 #### SIMPLE_SHELL
-This is a simple shell program that has the show features.
-Compile command: gcc -Wall -Werror -Wextra -pedantic -std=gnu89 -g *.c -o s_sh
 
-##### 0.
+This is a simple shell program that has the show features.
+Compile command: gcc -std=c17 -g -pedantic -Wall -Werror -Wextra -fdiagnostics-color=always
+-fsanitize=undefined -fsanitize-undefined-trap-on-error -fstack-protector-all ./*.c -o ./s_sh
+
+##### ABOUT
+
 This program has been written in [Betty coding style](https://github.com/alx-tools/Betty/wiki#1-coding-style) and [documentation](https://github.com/alx-tools/Betty/wiki#2-documentation).
 
-##### 1. v0.0
+##### v0.0
+
 The program has an interactive and non-interactive mode.
 In interactive mode:
+
 - Displays a prompt and waits for the user to type a command. A command line
     always ends with a new line.
 - The prompt is displayed again each time a command has been executed.
@@ -20,20 +25,24 @@ In interactive mode:
 - Handles errors.
 - Handles the “end of file” condition (Ctrl+D)
 
-##### 2. v0.1
+##### v0.1
+
 Can now handle command line arguments.
 
-##### 3. v0.2
+##### v0.2
+
 If commands given to the shell are not absolute pathnames. The shell searches
 for the file in the PATH evironment variable. Fork will not be called when the
 command is not found.
 
-##### 4. v0.3
+##### v0.3
 
-##### 5. v1.0
+##### v1.0
 
-##### 6. v.0.1.1
+##### v.0.1.1
+
 The program uses a custom getline function [_getline](./_getline.c "_getline.c")
 
-##### 7. v0.2.1
+##### v0.2.1
+
 The program uses a custom strtok function [_strtok](./_strtok.c "_getline.c")

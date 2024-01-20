@@ -2,7 +2,7 @@
 
 # Final binary executable
 BINARY := ./s_sh
-SRC_DIR := ./
+SRC_DIR := ./src
 # Library directories
 LIB_DIR := lib/
 # Directory to place object files
@@ -30,8 +30,6 @@ DEP_FLAGS := -MP -MMD
 WRN_FLAGS := -pedantic -Wall -Werror -Wextra
 # Debugging flags
 F_FLAGS := -fdiagnostics-color=always -fsanitize=undefined -fsanitize-undefined-trap-on-error -fstack-protector-all -g
-# Libraries to link
-LNK_FLAGS := -lm -lrt
 
 CFLAGS := $(INCL_FLAGS) -std=c17 $(WARN_FLAGS) $(F_FLAGS) $(DEP_FLAGS)
 
@@ -45,7 +43,7 @@ $(BUILD_DIR) :
 # Rule for compiling a final executable file
 # $@ - the target. $^ - the prerequisites
 $(BINARY) : $(OBJ_FILES)
-	@$(CC) $^ -o $@ $(LNK_FLAGS)
+	@$(CC) $^ -o $@
 
 # Redifing implicit rule for making object files
 # $< - only the first prerequisite
@@ -58,11 +56,11 @@ clean :
 	@rm -rd --preserve-root $(BUILD_DIR)
 
 # Make a copy of all source codes, header files and Makefile into a back_up folder
-cpy-src :
+back_up :
 	@cp -fu $(SRC_FILES) $(shell find $(SRC_DIR) -name '*.h') Makefile ./back_up
 
 # .PHONY so that the rules work even if a file with the same target-name exists.
-.PHONY : all clean cpy-src $(BUILD_DIR)
+.PHONY : all clean back_up $(BUILD_DIR)
 
 # Include the dependencies
 -include $(DEP_FILES)

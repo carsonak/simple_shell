@@ -1,2 +1,2 @@
-build/main.o: _strcspn.c shell.h
-shell.h:
+build/main.o: _strcspn.c u_string.h
+u_string.h:
