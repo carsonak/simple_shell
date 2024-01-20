@@ -9,7 +9,7 @@
  */
 int main(int argc, char *argv[])
 {
-	char **cl_args = NULL;
+	char *arg_cpy = NULL;
 	int err = 0;
 
 	errno = 0;
@@ -23,15 +23,15 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		cl_args = &argv[1];
-		err = isPath(cl_args);
+		arg_cpy = argv[1];
+		err = isPath(&argv[1]);
 		if (err == 1)
-			executor(cl_args);
+			executor(&argv[1]);
 		else if (err == 0)
-			err_handler(NULL, 127, cl_args[0]);
+			err_handler(NULL, 127, argv[1]);
 
-		if ((void *)argv[1] != (void *)cl_args[0])
-			free(cl_args[0]);
+		if ((void *)argv[1] != (void *)arg_cpy)
+			free(argv[1]);
 	}
 
 	return (err_handler(NULL, -1, NULL));
