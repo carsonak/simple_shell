@@ -1,7 +1,7 @@
 #!/usr/bin/make
 
 # Final binary executable
-BINARY := ./s_sh
+BINARY := s_sh
 SRC_DIR := ./src
 # Library directories
 LIB_DIR := lib/
@@ -40,10 +40,13 @@ all : $(BINARY)
 $(BUILD_DIR) :
 	@mkdir -p $@
 
+$(SRC_DIR):
+	@mkdir -p $@
+
 # Rule for compiling a final executable file
-# $@ - the target. $^ - the prerequisites
-$(BINARY) : $(OBJ_FILES)
-	@$(CC) $^ -o $@
+# $@ - the target. $^ - all the prerequisites
+$(BINARY) : $(OBJ_FILES) upt_src
+	@$(CC) $< -o $@
 
 # Redifing implicit rule for making object files
 # $< - only the first prerequisite
@@ -55,12 +58,13 @@ $(OBJ_FILES) : $(SRC_FILES) $(BUILD_DIR)
 clean :
 	@rm -rd --preserve-root $(BUILD_DIR)
 
-# Make a copy of all source codes, header files and Makefile into a back_up folder
-back_up :
-	@cp -fu $(SRC_FILES) $(shell find $(SRC_DIR) -name '*.h') Makefile ./back_up
+# Make a copy of all source codes, header files into a back_up folder
+upt_src : $(SRC_DIR)
+	@cp -fu $(shell find './' -mount ! \( -path ./src -prune \) -a \( -name '*.h' -o -name '*.c' \)) $(SRC_DIR)
+	@cp -fu $(BINARY) ../
 
 # .PHONY so that the rules work even if a file with the same target-name exists.
-.PHONY : all clean back_up $(BUILD_DIR)
+.PHONY : all clean upt_src $(BUILD_DIR)
 
 # Include the dependencies
 -include $(DEP_FILES)
