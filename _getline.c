@@ -9,101 +9,77 @@
  * Description: This function does not work the same as the std getline
  * function.
  *
- * Return: number of characters in line, -1 on fail, -2 on EOF
+ * Return: number of characters in line, 0 on EOF, -1 on failure
  */
-long int _getline(char **line, ssize_t *ln_sz, int fd)
+ssize_t _getline(char **line, ssize_t *ln_sz, int fd)
 {
 	static ssize_t byt_cnt, crnt_i;
 	static char buff[BUFFER_SIZE];
 	ssize_t len = 0;
 
+	if (!line)
+		return (-1);
+
 	if (byt_cnt < 1)
 	{
 		crnt_i = 0;
 		_memset(buff, '\0', BUFFER_SIZE);
-		byt_cnt = read(fd, buff, BUFFER_SIZE);
-		if (byt_cnt == -1)
-			return (-1);
-		else if (!byt_cnt)
-		{
-			is_EOF(1);
-			*ln_sz = len;
-			return (0);
-		}
+		byt_cnt = read(fd, buff, BUFFER_SIZE - 2);
+		if (byt_cnt < 1)
+			return (byt_cnt);
 	}
 
+	free(*line);
 	len = find_line(buff, crnt_i, byt_cnt);
-	*line = line_alloc(len, *line, &buff[crnt_i]);
+	*line = line_alloc(len, &buff[crnt_i]);
 	if (!(*line))
 		return (-1);
 
 	*ln_sz = len;
 	crnt_i += len;
-	if (byt_cnt <= crnt_i)
+	byt_cnt -= len;
+	if ((*line)[len - 1] == '\n')
 	{
-		byt_cnt = 0;
-		return (0);
+		(*line)[len - 1] = '\0';
+		len--;
 	}
 
 	return (len);
 }
 
 /**
- * find_line - breaks characters in a buffer into lines.
- * @buff: a buffer containing characters
+ * find_line - finds the next "\n" character in a buffer
+ * @buff: a buffer of characters
  * @crnt_i: starting index
- * @byt_cnt: position of the last recorded byte in the buffer + 1.
+ * @byt_cnt: maximum bytes that can be read
  *
- * Return: total bytes in the line
+ * Return: total bytes read
  */
 ssize_t find_line(char *buff, ssize_t crnt_i, ssize_t byt_cnt)
 {
 	ssize_t i = 0;
 
-	while ((buff[crnt_i + i] != '\n') && (crnt_i + i) < (byt_cnt - 1))
+	while ((buff[crnt_i + i] != '\n') && i < (byt_cnt - 1))
 		i++;
 
 	return (i + 1);
 }
 
 /**
- * line_alloc - concatenates strings from _getline
- * @len: number of bytes to read from the input buffer
- * @line: line without a '\n'
- * @buff: input buffer from _getline
+ * line_alloc - read len bytes from a buffer and stores them in a string
+ * @len: number of bytes to be read
+ * @buff: buffer to read from
  *
- * Return: pointer to the concatenated string, NULL on failure
+ * Return: pointer to the string, NULL on failure
  */
-char *line_alloc(ssize_t len, char *line, char *buff)
+char *line_alloc(ssize_t len, char *buff)
 {
-	char *str = NULL, *ln_cpy = line;
+	char *line = malloc((sizeof(*line) * len) + 1);
 
-	str = malloc((sizeof(*str) * len) + 1);
-	if (!str)
+	if (!line)
 		return (NULL);
 
-	str = _strncpy(str, buff, len);
-	str[len] = '\0';
-	line = str_concat(line, str);
-	if (ln_cpy)
-		free(ln_cpy);
-
-	free(str);
+	_strncpy(line, buff, len);
+	line[len] = '\0';
 	return (line);
-}
-
-/**
- * is_EOF - records EOF value from read
- * @seteof: an int used to set or check EOF
- *
- * Return: +ve int if EOF, 0 if false
- */
-int is_EOF(int seteof)
-{
-	static int isEOF;
-
-	if (seteof != -1)
-		isEOF = seteof;
-
-	return (isEOF);
 }

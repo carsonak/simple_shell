@@ -60,6 +60,7 @@ void inatty(void)
 				{
 					executor(cmd_arr);
 					free(cmd_cpy);
+					cmd_cpy = NULL;
 				}
 				else if (err == 0)
 					err_handler(NULL, 127, cmd_arr[0]);
@@ -68,8 +69,11 @@ void inatty(void)
 			}
 
 			free(line);
+			line = NULL;
 		}
 	}
+
+	write(STDOUT_FILENO, "\n", 1);
 }
 
 /**
@@ -97,6 +101,7 @@ void notatty(void)
 				{
 					executor(cmd_arr);
 					free(cmd_cpy);
+					cmd_cpy = NULL;
 				}
 				else if (err == 0)
 					err_handler(NULL, 127, cmd_arr[0]);
@@ -105,6 +110,7 @@ void notatty(void)
 			}
 
 			free(line);
+			line = NULL;
 		}
 	}
 }

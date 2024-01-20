@@ -42,7 +42,6 @@ char *_getenv(char *name);
 void inatty(void);
 void notatty(void);
 void prompt(void);
-char *lintos(ssize_t num);
 
 cmd_str *add_node_end(cmd_str **head, char *str);
 void free_list(cmd_str *head);
@@ -50,16 +49,15 @@ void free_list(cmd_str *head);
 char **parser(char *line);
 int executor(char **cmds);
 
-void flush_io(void);
-void free_args(char **cmds);
-char **cmd_fill(cmd_str *head, char **cmds);
 int isPath(char **cmd);
+int is_abs_path(char *cmd);
+int searchDIR(char **dirPath, char *file);
 int abs_search(char **path);
 char *append_dir(char *path, char *cwd);
-int searchDIR(char **dirPath, char *file);
-char *trim_str(char *str, int cut);
-int is_abs_path(char *cmd);
+char **cmd_fill(cmd_str *head, char **cmds);
 char *make_path(char *directory, char *file);
+
+void free_args(char **cmds);
 int err_handler(char *prog_name, int stat, char *cmd);
 int badbad(char *prog_name, char **msg, char *cnt_s, char *cmd, char *panic);
 

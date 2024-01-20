@@ -39,12 +39,12 @@ int isPath(char **cmd)
 		directory = _strtok(NULL, ":");
 	}
 
-	free(environ);
 	if (directory)
 		*cmd = make_path(directory, *cmd);
 	else
 		return (0);
 
+	free(environ);
 	if (errno || !(*cmd))
 		return (-1);
 
@@ -81,16 +81,21 @@ int is_abs_path(char *cmd)
 char *make_path(char *directory, char *file)
 {
 	char *path = NULL;
+	size_t p_len = _strlen(directory) + _strlen(file) + 2;
 
-	path = malloc(sizeof(*directory) * (_strlen(directory) + _strlen(file)) + 2);
+	if (!directory || !file)
+		return (NULL);
+
+	path = malloc(sizeof(*path) * p_len);
+	_memset(path, '\0', p_len);
 	if (path)
 	{
-		_strncpy(path, directory, (_strlen(directory) + 1));
-		_strncat(path, "/", 2);
-		_strncat(path, file, (_strlen(file) + 1));
+		_strncpy(path, directory, _strlen(directory));
+		_strncat(path, "/\0", 1);
+		_strncat(path, file, _strlen(file));
 	}
 	else
-		return (NULL);
+		perror("make_path: Malloc fail");
 
 	return (path);
 }

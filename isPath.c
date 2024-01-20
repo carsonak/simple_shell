@@ -32,7 +32,8 @@ int isPath(char **cmd)
 			free(environ);
 			return (-1);
 		}
-		else if (err == 1)
+
+		if (err == 1)
 			break;
 
 		directory = _strtok(NULL, ":");
@@ -41,10 +42,7 @@ int isPath(char **cmd)
 	if (directory)
 		*cmd = make_path(directory, *cmd);
 	else
-	{
-		free(environ);
 		return (0);
-	}
 
 	free(environ);
 	if (errno || !(*cmd))
@@ -54,23 +52,23 @@ int isPath(char **cmd)
 }
 
 /**
- * is_abs_path - checks if the first character/s of cmd is "/" or "./"
+ * is_abs_path - check if first character/s of cmd are "/" or "./" or "../"
  * @cmd: the string to be checked
  *
  * Return: 0 if is absolute pathname, a +/- int if not
  */
 int is_abs_path(char *cmd)
 {
-	int err = 0;
+	int diff = 0;
 
-	err = _strncmp(cmd, "/", 1);
-	if (err)
-		err = _strncmp(cmd, "./", 2);
+	diff = _strncmp(cmd, "/", 1);
+	if (diff)
+		diff = _strncmp(cmd, "./", 2);
 
-	if (err)
-		err = _strncmp(cmd, "../", 3);
+	if (diff)
+		diff = _strncmp(cmd, "../", 3);
 
-	return (err);
+	return (diff);
 }
 
 /**
@@ -83,17 +81,21 @@ int is_abs_path(char *cmd)
 char *make_path(char *directory, char *file)
 {
 	char *path = NULL;
+	size_t p_len = _strlen(directory) + _strlen(file) + 2;
 
-	path = malloc(sizeof(*directory) * (_strlen(directory) + _strlen(file)) + 2);
+	if (!directory || !file)
+		return (NULL);
+
+	path = malloc(sizeof(*path) * p_len);
+	_memset(path, '\0', p_len);
 	if (path)
 	{
-		path = _strncpy(path, directory, (_strlen(directory) + 1));
-		path = _strncat(path, "/", 2);
-		path = _strncat(path, file, (_strlen(file) + 1));
-		free(file);
+		_strncpy(path, directory, _strlen(directory));
+		_strncat(path, "/\0", 1);
+		_strncat(path, file, _strlen(file));
 	}
 	else
-		return (NULL);
+		perror("make_path: Malloc fail");
 
 	return (path);
 }

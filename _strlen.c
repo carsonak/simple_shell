@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "u_string.h"
 
 /**
  *_strlen - calculates length of a string
@@ -8,9 +8,9 @@
  */
 size_t _strlen(char *s)
 {
-	size_t cnt;
+	size_t cnt = 0;
 
-	for (cnt = 0; s[cnt]; cnt++)
+	for (cnt = 0; s && s[cnt]; cnt++)
 		;
 
 	return (cnt);

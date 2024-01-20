@@ -1,7 +1,7 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#include <string.h>	  /*strtok(), strlen()*/
+#include "u_string.h" /*string lib replicas*/
 #include <stdio.h>	  /*perror(), dprintf()*/
 #include <errno.h>	  /*perror(), errno global variables*/
 #include <unistd.h>	  /*write(), fork(), execve(), read(), close()*/
@@ -10,11 +10,12 @@
 #include <signal.h>	  /*signal()*/
 #include <dirent.h>	  /*opendir(), readdir()*/
 #include <stdbool.h>  /*bool*/
-#include <stdarg.h>	  /*variadic functions*/
 #include <sys/types.h>/*wait(), waitpid(), fork(), open()*/
 #include <sys/wait.h> /*wait(), waitpid()*/
 #include <sys/stat.h> /*open()*/
-#define BUFFER_SIZE (1024 * 1024)
+
+/*Buffer size for _getline*/
+#define BUFFER_SIZE (1024 * 8)
 
 /**
  * struct command_string_list - linked list of a command and it's options
@@ -29,41 +30,34 @@ typedef struct command_string_list
 	struct command_string_list *next;
 } cmd_str;
 
-/*standard lib functions replicas*/
-size_t _strlen(char *s);
-size_t _strspn(char *s, char *accept);
-size_t _strcspn(char *s, char *reject);
+/*Standard lib functions replicas*/
+
+char *_memset(char *s, char c, unsigned int n);
 long int _getline(char **line, ssize_t *ln_sz, int fd);
 ssize_t find_line(char *buff, ssize_t crnt_i, ssize_t byt_cnt);
-char *line_alloc(ssize_t len, char *line, char *buff);
-char *_strtok(char *str, char *delim);
-char *_memset(char *s, char c, unsigned int n);
-char *_strncpy(char *dest, char *src, int n);
-char *_strdup(char *str);
-int _strncmp(char *s1, char *s2, size_t n);
-char *_strncat(char *dest, char *src, int n);
+char *line_alloc(ssize_t len, char *buff);
 char *_getenv(char *name);
 /*end*/
-char *stringscat(size_t items, ...);
-char *str_concat(char *s1, char *s2);
-char *lintos(ssize_t num);
-int is_EOF(int seteof);
-cmd_str *add_node_end(cmd_str **head, char *str);
+
+void inatty(void);
+void notatty(void);
 void prompt(void);
-ssize_t parse_n_exec(void);
-int executor(char **cmds);
-char **parser(char **cmds, char *line);
+
+cmd_str *add_node_end(cmd_str **head, char *str);
 void free_list(cmd_str *head);
-void flush_io(void);
-void free_args(char **cmds);
-char **cmds_fill(cmd_str *head, char **cmds);
+
+char **parser(char *line);
+int executor(char **cmds);
+
 int isPath(char **cmd);
-int abs_search(char **path);
-int rel_path(char **path);
-int searchDIR(char **dirPath, char *file);
-char *trim_str(char *str, int cut);
 int is_abs_path(char *cmd);
+int searchDIR(char **dirPath, char *file);
+int abs_search(char **path);
+char *append_dir(char *path, char *cwd);
+char **cmd_fill(cmd_str *head, char **cmds);
 char *make_path(char *directory, char *file);
+
+void free_args(char **cmds);
 int err_handler(char *prog_name, int stat, char *cmd);
 int badbad(char *prog_name, char **msg, char *cnt_s, char *cmd, char *panic);
 

@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "u_string.h"
 
 /**
  * _strncmp - compares the first n characters of 2 strings
