@@ -26,7 +26,7 @@ HDR_FILES := $(foreach dir, $(INCL_DIRS), $(shell find '$(dir)' -maxdepth 1 -nam
 # Library source  files
 LIB_SRC_FILES := $(foreach dir, $(LIB_SRC_DIR), $(shell find '$(dir)' -maxdepth 1 -name '*.c' -type f | sort))
 # Library object files
-LBO_FILES := $(foreach lib_objf,$(LIB_SRC_FILES:%.c=%.o),$(BUILD_DIR)/$(notdir $(lib_objf)))
+LBO_FILES := $(foreach lib_objf,$(LIB_SRC_FILES:%.c=%.o),$(LIBC_DIR)/$(notdir $(lib_objf)))
 # Linker flags
 LDIRS := -L$(LIBC_DIR)
 LNAMES := -l$(LIB_NAME)
@@ -59,7 +59,7 @@ $(LIBC_DIR) $(BUILD_DIR) :
 
 # Making executable
 # $^ - all the prerequisites
-$(BINARY) : $(OBJ_FILES) $(LIBC_DIR)/$(FULL_LIB_NM)(*.o)
+$(BINARY) : $(OBJ_FILES) $(LIBC_DIR)/$(FULL_LIB_NM)
 	@$(CC) $(LDIRS) $(LNAMES) $< -o $@
 
 # Making object files and moving them to obj dir
@@ -73,8 +73,8 @@ $(LBO_FILES) : $(LIB_SRC_FILES) $(LIBC_DIR)
 
 # Updating members of the library
 # @ - silence printing of the command
-$(LIBC_DIR)/$(FULL_LIB_NM)(*.o) : $(LBO_FILES)
-	@ar -Urcus $@ $(LBO_FILES)
+$(LIBC_DIR)/$(FULL_LIB_NM) : $(LBO_FILES)
+	@ar -Urcus '$@' $(LBO_FILES)
 
 # Delete build folder
 clean :
@@ -103,7 +103,7 @@ show :
 	'$(notdir $(SRC_FILES))'
 
 	@printf "OBJECT FILES\nDIR: %s\n%s\n\n" \
-	'$(shell ls -d $(BUILD_DIR))' \
+	'$(shell find $(BUILD_DIR) -type d)' \
 	'$(notdir $(shell find $(BUILD_DIR) -name '*.o' -type f))'
 
 	@printf "LIBRARY ARCHIVE:\nNAME: %s\n%s\n\n" \
