@@ -78,6 +78,7 @@ void inatty(void)
 		}
 	}
 
+	/*Shell should exit on a newline*/
 	write(STDOUT_FILENO, "\n", 1);
 }
 
