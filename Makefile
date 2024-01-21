@@ -53,14 +53,14 @@ CFLAGS := $(INCL_FLAGS) -std=c17 $(WARN_FLAGS) $(F_FLAGS) $(DEP_FLAGS)
 # First rule that will be run by make on default
 all : $(BINARY)
 
-# Create build folder if it don't exist
+# Create build folder
 $(LIBC_DIR) $(BUILD_DIR) :
 	@mkdir -p $(LIBC_DIR)
 
 # Making executable
 # $^ - all the prerequisites
-$(BINARY) : $(OBJ_FILES) $(LIBC_DIR)/$(FULL_LIB_NM)
-	@$(CC) $(LDIRS) $(LNAMES) $^ -o $@
+$(BINARY) : $(OBJ_FILES) $(LIBC_DIR)/$(FULL_LIB_NM)(*.o)
+	@$(CC) $(LDIRS) $(LNAMES) $< -o $@
 
 # Making object files and moving them to obj dir
 # $< - only the first prerequisite
@@ -73,8 +73,8 @@ $(LBO_FILES) : $(LIB_SRC_FILES) $(LIBC_DIR)
 
 # Updating members of the library
 # @ - silence printing of the command
-$(LIBC_DIR)/$(FULL_LIB_NM) : $(LBO_FILES)
-	@ar -Urcus $@ $<
+$(LIBC_DIR)/$(FULL_LIB_NM)(*.o) : $(LBO_FILES)
+	@ar -Urcus $@ $(LBO_FILES)
 
 # Delete build folder
 clean :
@@ -106,8 +106,8 @@ show :
 	'$(shell ls -d $(BUILD_DIR))' \
 	'$(notdir $(shell find $(BUILD_DIR) -name '*.o' -type f))'
 
-	@printf "LIBRARY ARCHIVE:\nDIR %s\n%s\n\n" \
-	'$(LIBC_DIR)' \
+	@printf "LIBRARY ARCHIVE:\nNAME: %s\n%s\n\n" \
+	'$(LIBC_DIR)/$(FULL_LIB_NM)' \
 	'$(shell ar -t '$(LIBC_DIR)/$(FULL_LIB_NM)')'
 
 	@printf "DEPENDENCIES\nDIR: %s\n%s\n\n" \
