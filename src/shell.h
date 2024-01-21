@@ -1,18 +1,18 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#include "u_string.h" /*string lib replicas*/
-#include <stdio.h>	  /*perror(), dprintf()*/
-#include <errno.h>	  /*perror(), errno global variables*/
-#include <unistd.h>	  /*write(), fork(), execve(), read(), close()*/
-#include <stdlib.h>	  /*exit()*/
-#include <fcntl.h>	  /*open()*/
-#include <signal.h>	  /*signal()*/
-#include <dirent.h>	  /*opendir(), readdir()*/
-#include <stdbool.h>  /*bool*/
-#include <sys/types.h>/*wait(), waitpid(), fork(), open()*/
-#include <sys/wait.h> /*wait(), waitpid()*/
-#include <sys/stat.h> /*open()*/
+#include "./u_str_funcs/u_string.h" /*string lib replicas*/
+#include <stdio.h>					/*perror(), dprintf()*/
+#include <errno.h>					/*perror(), errno global variables*/
+#include <unistd.h>					/*write(), fork(), execve(), read(), close()*/
+#include <stdlib.h>					/*exit()*/
+#include <fcntl.h>					/*open()*/
+#include <signal.h>					/*signal()*/
+#include <dirent.h>					/*opendir(), readdir()*/
+#include <stdbool.h>				/*bool*/
+#include <sys/types.h>				/*wait(), waitpid(), fork(), open()*/
+#include <sys/wait.h>				/*wait(), waitpid()*/
+#include <sys/stat.h>				/*open()*/
 
 /*Buffer size for _getline*/
 #define BUFFER_SIZE (1024 * 8)
