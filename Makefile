@@ -5,10 +5,16 @@
 BINARY := $(PWD)/s_sh
 # Directory with source files
 SRC_DIR := $(PWD)/src
-# Library directories
-LIB_DIR := $(shell ls -d $(shell find '$(PWD)' -mount -name 'lib*' -type d))
 # Directory to place object files
 BUILD_DIR := ./build
+
+# Common Library name
+LIB_NAME := common
+FULL_LIB_NM := lib$(LIB_NAME).a
+# Compiled library directory
+LIBC_DIR := $(BUILD_DIR)/$(LIB_NAME)_lib
+# Library directories
+LIB_SRC_DIR := $(shell ls -d $(shell find '$(SRC_DIR)' -mount -iname 'lib*' -type d) | sort -u)
 
 # Directories with header files
 INCL_DIRS := $(shell dirname $(shell find '$(PWD)' -mount -name '*.h' -type f ) | sort -u)
@@ -17,12 +23,20 @@ INCL_FLAGS := $(addprefix -I,'$(INCL_DIRS)')
 # Header files
 HDR_FILES := $(foreach dir, $(INCL_DIRS), $(shell find '$(dir)' -maxdepth 1 -name '*.h' -type f))
 
-# Source files
-SRC_FILES := $(shell find '$(SRC_DIR)' -mount -name '*.c' -type f | sort)
+# Library source  files
+LIB_SRC_FILES := $(foreach dir, $(LIB_SRC_DIR), $(shell find '$(dir)' -maxdepth 1 -name '*.c' -type f | sort))
+# Library object files
+LBO_FILES := $(foreach lib_objf,$(LIB_SRC_FILES:%.c=%.o),$(BUILD_DIR)/$(notdir $(lib_objf)))
+# Linker flags
+LDIRS := -L$(LIBC_DIR)
+LNAMES := -l$(LIB_NAME)
+
+# Other source files
+SRC_FILES := $(shell find '$(SRC_DIR)' -mount ! \( -path '$(LIB_SRC_DIR)' -prune \) -a \( -name '*.c' -type f \) | sort)
 # Object files are stored in ./build
 OBJ_FILES := $(foreach obj_file,$(SRC_FILES:%.c=%.o),$(BUILD_DIR)/$(notdir $(obj_file)))
 # Dependency files for make
-DEP_FILES := $(OBJ_FILES:.o=.d)
+DEP_FILES := $(LBO_FILES:.o=.d) $(OBJ_FILES:.o=.d)
 
 # Compiler
 CC := gcc
@@ -39,22 +53,30 @@ CFLAGS := $(INCL_FLAGS) -std=c17 $(WARN_FLAGS) $(F_FLAGS) $(DEP_FLAGS)
 # First rule that will be run by make on default
 all : $(BINARY)
 
-# Making executable
 # Create build folder if it don't exist
-$(BUILD_DIR) :
-	@mkdir -p '$@'
+$(LIBC_DIR) $(BUILD_DIR) :
+	@mkdir -p $(LIBC_DIR)
 
-# $@ - the target. $^ - all the prerequisites
-$(BINARY) : $(OBJ_FILES)
-	@$(CC) '$<' -o '$@'
+# Making executable
+# $^ - all the prerequisites
+$(BINARY) : $(OBJ_FILES) $(LIBC_DIR)/$(FULL_LIB_NM)
+	@$(CC) $(LDIRS) $(LNAMES) $^ -o $@
 
 # Making object files and moving them to obj dir
 # $< - only the first prerequisite
 $(OBJ_FILES) : $(SRC_FILES) $(BUILD_DIR)
-	@$(CC) '$(CFLAGS)' -c '$<' -o '$@'
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# $@ - the target
+$(LBO_FILES) : $(LIB_SRC_FILES) $(LIBC_DIR)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# Updating members of the library
+# @ - silence printing of the command
+$(LIBC_DIR)/$(FULL_LIB_NM) : $(LBO_FILES)
+	@ar -Urcus $@ $<
 
 # Delete build folder
-# @ - silence printing of the command
 clean :
 	@rm -rd --preserve-root '$(BUILD_DIR)'
 
@@ -66,26 +88,39 @@ clean-wksp :
 up-wksp :
 	@cp -fu $(shell find '$(SRC_DIR)' -mount -name '*.c' -type f) $(HDR_FILES) $(PWD)
 
-# Print out header files, source files and object files
+# Print out various files in the project
 show :
 	@printf "HEADER FILES\nDIR: %s\n%s\n\n" \
 	'$(INCL_DIRS)' \
 	'$(notdir $(HDR_FILES))'
+
+	@printf "LIBRARY FILES\nDIR: %s\n%s\n\n" \
+	'$(LIB_SRC_DIR)' \
+	'$(notdir $(LIB_SRC_FILES))'
 
 	@printf "SOURCE FILES\nDIR: %s\n%s\n\n" \
 	'$(shell dirname $(shell find '$(PWD)' -type f -name '*.c') | sort -u)' \
 	'$(notdir $(SRC_FILES))'
 
 	@printf "OBJECT FILES\nDIR: %s\n%s\n\n" \
-	'$(shell dirname $(shell find '$(PWD)' -type f -name '*.o') | sort -u)' \
-	'$(notdir $(OBJ_FILES))'
+	'$(shell ls -d $(BUILD_DIR))' \
+	'$(notdir $(shell find $(BUILD_DIR) -name '*.o' -type f))'
 
-# Print out all global variables
+	@printf "LIBRARY ARCHIVE:\nDIR %s\n%s\n\n" \
+	'$(LIBC_DIR)' \
+	'$(shell ar -t '$(LIBC_DIR)/$(FULL_LIB_NM)')'
+
+	@printf "DEPENDENCIES\nDIR: %s\n%s\n\n" \
+	'$(BUILD_DIR)' \
+	'$(notdir $(shell find $(BUILD_DIR) -name '*.d' -type f))'
+
+# Print out all user set global variables
 all-vars :
 	$(foreach V,$(sort $(.VARIABLES)),\
 		$(if \
-			$(filter-out environment% default automatic, $(origin $V)),\
-					$(info $V = $(value $V))\
+			$(filter-out environment% default automatic, \
+				$(origin $V)),\
+				$(info $V = $(value $V))\
 		)\
 	)
 
