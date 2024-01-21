@@ -99,7 +99,7 @@ show :
 	'$(notdir $(LIB_SRC_FILES))'
 
 	@printf "SOURCE FILES\nDIR: %s\n%s\n\n" \
-	'$(shell dirname $(shell find '$(PWD)' -type f -name '*.c') | sort -u)' \
+	'$(shell dirname $(SRC_FILES) | sort -u)' \
 	'$(notdir $(SRC_FILES))'
 
 	@printf "OBJECT FILES\nDIR: %s\n%s\n\n" \
@@ -125,7 +125,7 @@ all-vars :
 	)
 
 # .PHONY so that the rules work even if a file with the same target-name exists.
-.PHONY : all clean clean-wksp upt-wksp show all-vars $(BUILD_DIR)
+.PHONY : all clean clean-wksp upt-wksp show all-vars
 
 # Include the dependencies
 -include $(DEP_FILES)
