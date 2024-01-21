@@ -10,11 +10,11 @@ LIB_DIR := $(shell ls -d $(shell find '$(PWD)' -mount -name 'lib*' -type d))
 BUILD_DIR := ./build
 
 # Directories with header files
-INCL_DIRS := $(shell dirname $(shell find '$(PWD)' -type f -name '*.h') | sort -u)
+INCL_DIRS := $(shell dirname $(shell find '$(PWD)' -mount -name '*.h' -type f ) | sort -u)
 # Include flags
 INCL_FLAGS := $(addprefix -I,'$(INCL_DIRS)')
 # Header files
-HDR_FILES := $(foreach dir,'$(INCL_DIRS)',$(shell find '$(dir)' -mount -name '*.h' -type f))
+HDR_FILES := $(foreach dir, $(INCL_DIRS), $(shell find '$(dir)' -maxdepth 1 -name '*.h' -type f))
 
 # Source files
 SRC_FILES := $(shell find '$(SRC_DIR)' -mount -name '*.c' -type f | sort)
