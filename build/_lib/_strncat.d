@@ -1,4 +1,4 @@
-build/common_lib/_strcpy.o: \
+build/_lib/_strncat.o: \
  /home/line/Github_Repositories/simple_shell/src/Lib1-u_string/_strcpy.c \
  /home/line/Github_Repositories/simple_shell/src/Lib1-u_string/u_string.h
 /home/line/Github_Repositories/simple_shell/src/Lib1-u_string/u_string.h:

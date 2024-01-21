@@ -7,36 +7,35 @@ BINARY := $(PWD)/s_sh
 SRC_DIR := $(PWD)/src
 # Directory to place object files
 BUILD_DIR := ./build
-
-# Common Library name
-LIB_NAME := common
-FULL_LIB_NM := lib$(LIB_NAME).a
 # Compiled library directory
 LIBC_DIR := $(BUILD_DIR)/$(LIB_NAME)_lib
 # Library directories
 LIB_SRC_DIR := $(shell ls -d $(shell find '$(SRC_DIR)' -mount -iname 'lib*' -type d) | sort -u)
-
 # Directories with header files
 INCL_DIRS := $(shell dirname $(shell find '$(PWD)' -mount -name '*.h' -type f ) | sort -u)
-# Include flags
-INCL_FLAGS := $(addprefix -I,'$(INCL_DIRS)')
-# Header files
-HDR_FILES := $(foreach dir, $(INCL_DIRS), $(shell find '$(dir)' -maxdepth 1 -name '*.h' -type f))
-
-# Library source  files
-LIB_SRC_FILES := $(foreach dir, $(LIB_SRC_DIR), $(shell find '$(dir)' -maxdepth 1 -name '*.c' -type f | sort))
-# Library object files
-LBO_FILES := $(foreach lib_objf,$(LIB_SRC_FILES:%.c=%.o),$(LIBC_DIR)/$(notdir $(lib_objf)))
-# Linker flags
-LDIRS := -L$(LIBC_DIR)
-LNAMES := -l$(LIB_NAME)
 
 # Other source files
 SRC_FILES := $(shell find '$(SRC_DIR)' -mount ! \( -path '$(LIB_SRC_DIR)' -prune \) -a \( -name '*.c' -type f \) | sort)
 # Object files are stored in ./build
 OBJ_FILES := $(foreach obj_file,$(SRC_FILES:%.c=%.o),$(BUILD_DIR)/$(notdir $(obj_file)))
+# Header files
+HDR_FILES := $(foreach dir, $(INCL_DIRS), $(shell find '$(dir)' -maxdepth 1 -name '*.h' -type f))
+
+# Common Library name
+LIB_NAME := common
+FULL_LIB_NM := lib$(LIB_NAME).a
+# Library source  files
+LIB_SRC_FILES := $(foreach dir, $(LIB_SRC_DIR), $(shell find '$(dir)' -maxdepth 1 -name '*.c' -type f | sort))
+# Library object files
+LBO_FILES := $(foreach lib_objf,$(LIB_SRC_FILES:%.c=%.o),$(LIBC_DIR)/$(notdir $(lib_objf)))
 # Dependency files for make
 DEP_FILES := $(LBO_FILES:.o=.d) $(OBJ_FILES:.o=.d)
+
+# Linker flags
+LDIRS := -L$(LIBC_DIR)
+LNAMES := -l$(LIB_NAME)
+# Include flags
+INCL_FLAGS := $(addprefix -I,'$(INCL_DIRS)')
 
 # Compiler
 CC := gcc
@@ -82,7 +81,7 @@ clean :
 
 # Clean Workspace folder
 clean-wksp :
-	@rm $(shell find '$(PWD)' -mount ! \( -path '$(SRC_DIR)' -prune \) -a \( -name '*.h' -o -name '*.c' \))
+	@rm $(shell find '$(PWD)' -mount -maxdepth 1  -name '*.h' -o -name '*.c')
 
 # Make a copy of all source codes, header files into a back_up folder
 up-wksp :
