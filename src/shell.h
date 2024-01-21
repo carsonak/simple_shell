@@ -1,7 +1,7 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#include "./u_str_funcs/u_string.h" /*string lib replicas*/
+#include "./1-ustr_fns/u_string.h" /*string lib replicas*/
 #include <stdio.h>					/*perror(), dprintf()*/
 #include <errno.h>					/*perror(), errno global variables*/
 #include <unistd.h>					/*write(), fork(), execve(), read(), close()*/

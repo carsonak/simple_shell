@@ -1,5 +1,6 @@
 #!/usr/bin/make -f
 
+# Initialising global variables. No trailing spaces
 # Final binary executable
 BINARY := $(PWD)/s_sh
 # Directory with source files
@@ -75,7 +76,7 @@ show :
 	'$(shell dirname $(shell find '$(PWD)' -type f -name '*.c') | sort -u)' \
 	'$(notdir $(SRC_FILES))'
 
-	@printf "OBJECT FILES\nDIR: %s\n%s\n" \
+	@printf "OBJECT FILES\nDIR: %s\n%s\n\n" \
 	'$(shell dirname $(shell find '$(PWD)' -type f -name '*.o') | sort -u)' \
 	'$(notdir $(OBJ_FILES))'
 
@@ -84,7 +85,7 @@ all-vars :
 	$(foreach V,$(sort $(.VARIABLES)),\
 		$(if \
 			$(filter-out environment% default automatic, $(origin $V)),\
-					$(warning $V=$($V) ($(value $V)))\
+					$(info $V = $(value $V))\
 		)\
 	)
 
