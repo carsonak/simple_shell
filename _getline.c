@@ -6,8 +6,12 @@
  * @ln_sz: address of an int to store length of the line
  * @fd: file descriptor to read from
  *
- * Description: This function does not work the same as the std getline
- * function.
+ * Description: _getline will read a certain number of bytes from the file
+ * descriptor storing them in a buffer. It will then parse the bytes into
+ * lines which it returns one by one till there are no more bytes to be read.
+ * EOF forces read to capture all that is in standard input and return. If
+ * there were no bytes to be read, stdin is closed? making all consequent reads
+ * to return 0.
  *
  * Return: number of characters in line, 0 on EOF, -1 on failure
  */
@@ -39,10 +43,7 @@ ssize_t _getline(char **line, size_t *ln_sz, int fd)
 	crnt_i += len;
 	byt_cnt -= len;
 	if ((*line)[len - 1] == '\n')
-	{
 		(*line)[len - 1] = '\0';
-		len--;
-	}
 
 	return (len);
 }

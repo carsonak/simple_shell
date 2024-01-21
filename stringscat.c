@@ -20,8 +20,8 @@ char *stringscat(size_t items, ...)
 	{
 		s2 = s1;
 		s1 = str_concat(s2, va_arg(ptr, char *));
-		if (s2)
-			free(s2);
+		free(s2);
+		s2 = NULL;
 
 		if (!s1)
 			break;

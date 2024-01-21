@@ -67,10 +67,11 @@ int abs_search(char **path)
 
 	cwd = _getenv("PWD");
 	cwd = _strdup(cwd);
-	if (!cwd || path)
+	if (!cwd || !path)
 		return (-1);
 
 	p_cpy = append_dir(*path, cwd);
+	free(cwd);
 	if (!p_cpy)
 		return (-1);
 
@@ -85,7 +86,6 @@ int abs_search(char **path)
 		p_cpy[len] = '/';
 	}
 
-	free(*path);
 	*path = p_cpy;
 	return (err);
 }
@@ -100,7 +100,7 @@ int abs_search(char **path)
 char *append_dir(char *path, char *cwd)
 {
 	size_t c_i = 0, spn = 0;
-	char *p_cpy = NULL;
+	char *p_cpy = NULL, *temp = NULL;
 
 	spn = _strspn(path, "./");
 	if (spn < 2)
@@ -125,5 +125,7 @@ char *append_dir(char *path, char *cwd)
 			cwd[c_i] = '\0';
 	}
 
-	return (stringscat(2, cwd, p_cpy));
+	temp = stringscat(3, cwd, "/", p_cpy);
+	free(p_cpy);
+	return (temp);
 }
