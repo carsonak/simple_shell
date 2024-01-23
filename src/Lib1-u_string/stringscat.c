@@ -4,6 +4,9 @@
  * stringscat - concatenates a variable number of strings
  * @items: the number of strings to be concatenated
  *
+ * Description: First item must be a malloced string or NULL as the
+ * function will attempt to free it.
+ *
  * Return: pointer to the resultant string, NULL on failure
  */
 char *stringscat(size_t items, ...)
@@ -20,9 +23,7 @@ char *stringscat(size_t items, ...)
 	{
 		s2 = s1;
 		s1 = str_concat(s2, va_arg(ptr, char *));
-		if (s2)
-			free(s2);
-
+		free(s2);
 		if (!s1)
 			break;
 
@@ -40,17 +41,17 @@ char *stringscat(size_t items, ...)
  *
  * Return: a pointer to the new string, NULL if it fails
  */
-char *str_concat(char *s1, char *s2)
+char *str_concat(const char *s1, const char *s2)
 {
 	char *bGstr = NULL;
 	size_t i = 0, j = 0;
 
 	if (s1 && s2)
-		bGstr = malloc((sizeof(*bGstr) * (_strlen(s1) + _strlen(s2))) + 1);
+		bGstr = malloc((sizeof(*bGstr) * (strlen(s1) + strlen(s2))) + 1);
 	else if (!s1 && s2)
-		bGstr = malloc((sizeof(*bGstr) * _strlen(s2)) + 1);
+		bGstr = malloc((sizeof(*bGstr) * strlen(s2)) + 1);
 	else if (s1 && !s2)
-		bGstr = malloc((sizeof(*bGstr) * _strlen(s1)) + 1);
+		bGstr = malloc((sizeof(*bGstr) * strlen(s1)) + 1);
 	else
 		bGstr = malloc(sizeof(*bGstr));
 
