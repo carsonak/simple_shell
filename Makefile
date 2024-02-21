@@ -1,4 +1,4 @@
-#!/usr/bin/make -f
+#!/usr/bin/env make
 
 # Initialising global variables. No trailing spaces
 # Final binary executable
@@ -59,16 +59,16 @@ $(LIBC_DIR) $(BUILD_DIR) :
 # Making executable
 # $^ - all the prerequisites
 $(BINARY) : $(OBJ_FILES) $(LIBC_DIR)/$(FULL_LIB_NM)
-	@$(CC) $(LDIRS) $(LNAMES) $< -o $@
+	@$(CC) $(LDIRS) $(LNAMES) $(OBJ_FILES) -o $@
 
 # Making object files and moving them to obj dir
 # $< - only the first prerequisite
 $(OBJ_FILES) : $(SRC_FILES) $(BUILD_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $(SRC_FILES) -o $@
 
 # $@ - the target
 $(LBO_FILES) : $(LIB_SRC_FILES) $(LIBC_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $(LIB_SRC_FILES) -o $@
 
 # Updating members of the library
 # @ - silence printing of the command
