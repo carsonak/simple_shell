@@ -1,5 +1,2 @@
-#gitignore for roughwork folders and test-suite
-TEST_SUITE
-runchecker.bash
-sh_checker_log.txt
-.vscode
+# objects folder
+obj
