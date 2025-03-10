@@ -1,2 +1,4 @@
 # objects folder
 obj
+
+__pycache__
