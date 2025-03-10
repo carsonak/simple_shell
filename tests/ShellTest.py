@@ -29,7 +29,6 @@ class ShellTestResult:
     command: bytes
     args: Iterable[bytes]
     return_status: int
-    timed_out: bool
     stdout: bytes
     stderr: bytes
 
@@ -43,8 +42,6 @@ class ShellTestCase:
     stdin: None | io.FileIO | int = None
     stdout: None | io.FileIO | int = None
     stderr: None | io.FileIO | int = None
-    test_shell_result = ShellTestResult(b"", list(), -1, False, b"", b"")
-    ctrl_shell_result = ShellTestResult(b"", list(), -1, False, b"", b"")
 
     def __init__(
         self, method_name: str, test_shell: str,
@@ -72,6 +69,8 @@ class ShellTestCase:
         self.control_shell = control_shell
         self.environment: dict[str, str] = environment
         self.asan_outfile = None
+        self.timed_out = False
+        self.tests_failed = False
         if check_asan is True:
             filename = (
                 f"ASAN-{"-".join(self.test_method.__module__.split("."))}-"
@@ -122,8 +121,9 @@ class ShellTestCase:
         pass
 
     def _run_shell(
-        self, is_ctrl: bool, command: bytes | None = None,
-        *args: bytes, timeout: float | None = 3.0
+        self, *args: bytes,
+        command: bytes | None = None, is_ctrl: bool = False,
+        timeout: float | None = 3.0
     ) -> subprocess.CompletedProcess:
         """Run a shell with the command given."""
         setup = self.setup_test_shell
@@ -158,73 +158,81 @@ class ShellTestCase:
 
     def run_test_shell(
         self, command: bytes | None = None, *args: bytes,
-        timeout: float | None = 2.0
+        timeout: float | None = 5.0
     ):
         """Run the test shell with the command given."""
-        self.test_shell_result.timed_out = False
+        self.timed_out = False
         try:
-            res = self._run_shell(False, command, *args, timeout=timeout)
+            res = self._run_shell(
+                *args, command=command, is_ctrl=False, timeout=timeout)
         except subprocess.TimeoutExpired:
-            self.test_shell_result.timed_out = True
+            self.tests_failed = True
+            self.timed_out = True
 
-        self.test_shell_result.command = command if command else b""
-        self.test_shell_result.args = args
-        if self.test_shell_result.timed_out:
-            self.test_shell_result.return_status = -1
-            self.test_shell_result.stdout = TIMED_OUT
-            self.test_shell_result.stderr = TIMED_OUT
+        if self.timed_out:
+            self.test_shell_result = ShellTestResult(
+                command=command if command else b"", args=args,
+                return_status=-1, stdout=TIMED_OUT,
+                stderr=TIMED_OUT
+            )
         else:
-            self.test_shell_result.return_status = res.returncode
-            self.test_shell_result.stdout = res.stdout
-            self.test_shell_result.stderr = res.stderr
+            self.test_shell_result = ShellTestResult(
+                command=command if command else b"", args=args,
+                return_status=res.returncode,
+                stdout=res.stdout, stderr=res.stderr
+            )
 
     def run_ctrl_shell(
         self, command: bytes | None = None, *args: bytes,
-        timeout: float | None = 2.0
+        timeout: float | None = 5.0
     ):
         """Run the control shell with the command given."""
-        self.ctrl_shell_result.timed_out = False
+        self.timed_out = False
         try:
-            res = self._run_shell(True, command, *args, timeout=timeout)
+            res = self._run_shell(
+                *args, command=command, is_ctrl=True, timeout=timeout)
         except subprocess.TimeoutExpired:
-            self.ctrl_shell_result.timed_out = True
+            self.tests_failed = True
+            self.timed_out = True
 
-        self.ctrl_shell_result.command = command if command else b""
-        self.ctrl_shell_result.args = args
-        if self.ctrl_shell_result.timed_out:
-            self.ctrl_shell_result.return_status = -1
-            self.ctrl_shell_result.stdout = TIMED_OUT
-            self.ctrl_shell_result.stderr = TIMED_OUT
+        if self.timed_out:
+            self.ctrl_shell_result = ShellTestResult(
+                command=command if command else b"", args=args,
+                return_status=-1, stdout=TIMED_OUT,
+                stderr=TIMED_OUT
+            )
         else:
-            self.ctrl_shell_result.return_status = res.returncode
-            self.ctrl_shell_result.stdout = res.stdout
-            self.ctrl_shell_result.stderr = res.stderr
+            self.ctrl_shell_result = ShellTestResult(
+                command=command if command else b"", args=args,
+                return_status=res.returncode,
+                stdout=res.stdout, stderr=res.stderr
+            )
 
-    def _report_test(self) -> str:
+    def _report_test(self) -> str | None:
         """Print out status of the test."""
         leaky = False
         if self.asan_outfile is not None:
             leaky = Path(self.asan_outfile).stat().st_size > 0
 
-        if not leaky or self.test_shell_result == self.ctrl_shell_result:
-            return Colors.BRIGHT_GREEN_TEXT + "OK." + Colors.RESET
+        if not leaky and self.test_shell_result == self.ctrl_shell_result:
+            return None
 
+        self.tests_failed = True
         report = "\n".join([
-            "",
-            Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + "(command)" + Colors.RESET,  # noqa: E501,B950
+            Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + "(command)" + Colors.RESET,  # noqa: E501
             f"echo {self.test_shell_result.command.decode()} | {self.test_shell} {b" ".join(self.test_shell_result.args).decode().strip()}",  # noqa: E501,B950
-            Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + "[GOT]:" + Colors.RESET,
+            Colors.BOLD + Colors.YELLOW_TEXT + "\n[GOT]:" + Colors.RESET,
             Colors.CYAN_TEXT + "(status)" + Colors.RESET + f" {self.test_shell_result.return_status}",  # noqa: E501,B950
             Colors.CYAN_TEXT + "(stdout)" + Colors.RESET,
             f"{self.test_shell_result.stdout.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.test_shell_result.stdout.count(b"\n")})" + Colors.RESET,  # noqa: E501,B950
             Colors.CYAN_TEXT + "(stderr)" + Colors.RESET,
             f"{self.test_shell_result.stderr.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.test_shell_result.stderr.count(b"\n")})" + Colors.RESET,  # noqa: E501,B950
-            Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + "[EXPECTED]:" + Colors.RESET,  # noqa: E501,B950
+            Colors.BOLD + Colors.YELLOW_TEXT + "\n[EXPECTED]:" + Colors.RESET,  # noqa: E501,B950
             Colors.CYAN_TEXT + "(status)" + Colors.RESET + f" {self.ctrl_shell_result.return_status}",  # noqa: E501,B950
             Colors.CYAN_TEXT + "(stdout)" + Colors.RESET,
             f"{self.ctrl_shell_result.stdout.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.ctrl_shell_result.stdout.count(b"\n")})" + Colors.RESET,  # noqa: E501,B950
             Colors.CYAN_TEXT + "(stderr)" + Colors.RESET,
-            f"{self.ctrl_shell_result.stderr.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.ctrl_shell_result.stderr.count(b"\n")})" + Colors.RESET  # noqa: E501,B950
+            f"{self.ctrl_shell_result.stderr.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.ctrl_shell_result.stderr.count(b"\n")})" + Colors.RESET + "\n"  # noqa: E501,B950
         ])
         if leaky and self.asan_outfile is not None:
             with open(self.asan_outfile) as f:
@@ -240,11 +248,16 @@ class ShellTestCase:
         finally:
             self.teardown()
 
-        print(
-            f"{self.test_method.__module__}.{self.test_method.__qualname__}"
-            f" {self._report_test()}",
-            file=sys.stderr
-        )
+        testname = f"{self.test_method.__module__}.{self.test_method.__qualname__}: "  # noqa: E501,B950
+        report = self._report_test()
+        doc = ""
+        if self.test_method.__doc__ and report is not None:
+            doc = self.test_method.__doc__ + "\n"
+
+        if report is None:
+            report = Colors.BRIGHT_GREEN_TEXT + "OK." + Colors.RESET
+
+        print(testname + f"{doc}{report}", file=sys.stderr)
 
 
 class ShellTestSuite:
@@ -272,7 +285,7 @@ class ShellTestSuite:
 
             test_cases.append(attr_name)
 
-        return test_cases
+        return sorted(test_cases)
 
     def run(self) -> None:
         """Run all tests in the suite."""
@@ -280,5 +293,7 @@ class ShellTestSuite:
         try:
             for test_case in self.test_cases:
                 test_case.run()
+                if test_case.tests_failed is True:
+                    break
         finally:
             self.test_suite.class_teardown()

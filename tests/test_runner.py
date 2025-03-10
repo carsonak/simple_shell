@@ -42,7 +42,7 @@ def main(test_shell: str, test_files: list[str], control_shell: str = "sh"):
     module_map: dict[str, list[ShellTest.ShellTestSuite]] = dict()
     for test_mod in test_modules:
         suite_list: list[ShellTest.ShellTestSuite] = list()
-        for suite in dir(test_mod):
+        for suite in sorted(dir(test_mod)):
             mod_attr = getattr(test_mod, suite)
             if (
                 isinstance(mod_attr, type) and
@@ -54,9 +54,9 @@ def main(test_shell: str, test_files: list[str], control_shell: str = "sh"):
 
         module_map[test_mod.__name__] = suite_list
 
-    for test_suite in module_map.values():
-        for case in test_suite:
-            case.run()
+    for suite_list in module_map.values():
+        for test_suite in suite_list:
+            test_suite.run()
 
 
 if __name__ == "__main__":
