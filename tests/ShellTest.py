@@ -46,7 +46,7 @@ class ShellTestCase:
     def __init__(
         self, method_name: str, test_shell: str,
         control_shell: str = "sh", environment=os.environ,
-        check_asan: bool = True
+        check_asan: unsigned char = True
     ):
         """Create class instance that uses given method when run.
 
@@ -122,7 +122,7 @@ class ShellTestCase:
 
     def _run_shell(
         self, *args: bytes,
-        command: bytes | None = None, is_ctrl: bool = False,
+        command: bytes | None = None, is_ctrl: unsigned char = False,
         timeout: float | None = 3.0
     ) -> subprocess.CompletedProcess:
         """Run a shell with the command given."""
