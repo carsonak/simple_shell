@@ -89,3 +89,69 @@ void *queue_delete(queue *const nullable_ptr, delete_func *free_data)
 	clear_queue(nullable_ptr, free_data);
 	return (_free(nullable_ptr));
 }
+
+/**
+ * delete_2D_array - free a 2 dimensional array from memory.
+ * @array: a 2 dimensional array.
+ * @size: number of columns in the array, should be greater than 0.
+ * @free_row: pointer to a function that will be used to free the rows.
+ *
+ * Return: NULL always.
+ */
+static void *delete_2D_array(
+	void **array, intmax_t size, delete_func *free_row)
+{
+	intmax_t a_i = 0;
+
+	if (!array || size < 1)
+		return (NULL);
+
+	for (a_i = 0; a_i < size; ++a_i)
+	{
+		free_row(array[a_i]);
+		array[a_i] = NULL;
+	}
+
+	return (_free(array));
+}
+
+/**
+ * queue_to_array - create an array from a queue.
+ * @q: the queue.
+ * @copy_data: optional pointer to a function that will be used to duplicate
+ * the data, if not provided, array will contain pointers to the original data
+ * in the queue.
+ * @free_data: optional pointer to a function that will be used to free data in
+ * the array in case of failure. If `copy_data` is provided this function must
+ * also be provided, otherwise no data duplication will occur.
+ *
+ * Return: pointer to the data array on success, NULL on failure.
+ */
+void **queue_to_array(
+	const queue *const q, dup_func *copy_data, delete_func *free_data)
+{
+	void **data_array = NULL;
+	single_link_node *node = NULL;
+	intmax_t d_i = 0;
+
+	if (!q || !q->head || q->length < 1)
+		return (NULL);
+
+	data_array = _calloc(q->length + 1, sizeof(*data_array));
+	if (!data_array)
+		return (NULL);
+
+	node = q->head;
+	for (d_i = 0; node; node = node->next, ++d_i)
+	{
+		data_array[d_i] = node->data;
+		if (copy_data && free_data)
+		{
+			data_array[d_i] = copy_data(node->data);
+			if (!data_array[d_i] && node->data)
+				return (delete_2D_array(data_array, q->length, free_data));
+		}
+	}
+
+	return (data_array);
+}

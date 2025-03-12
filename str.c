@@ -16,14 +16,14 @@ static unsigned char overlaps_greater_indices(
 }
 
 /**
- * _memcpy - copies `n` bytes from one memory block to another.
+ * _memncpy - copies `n` bytes from one memory block to another.
  * @dest: the destination memory.
  * @src: source memory block.
  * @n: number of bytes to copy.
  *
  * Return: returns pointer to `dest`.
  */
-char *_memcpy(char *const dest, const char *const src, const intmax_t n)
+char *_memncpy(char *const dest, const char *const src, const intmax_t n)
 {
 	intmax_t i;
 
@@ -33,12 +33,12 @@ char *_memcpy(char *const dest, const char *const src, const intmax_t n)
 	if (overlaps_greater_indices(dest, src, n) == 1)
 	{
 		for (i = n; i > 0; --i)
-			*(dest + (i - 1)) = *(src + (i - 1));
+			dest[i - 1] = src[i - 1];
 	}
 	else
 	{
 		for (i = 0; i < n; ++i)
-			*(dest + i) = *(src + i);
+			dest[i] = src[i];
 	}
 
 	return (dest);

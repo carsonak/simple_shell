@@ -1,113 +1,103 @@
 #include "simple_shell.h"
-
-#include <stdio.h> /* fprintf */
-
-/**
- * print_func - a function that prints an object.
- * @output_stream: pointer to a stream to print to.
- * @data: the object to print.
- *
- * Return: number of characters printed, negative number on error.
- */
-typedef int(print_func)(FILE *output_stream, void const *const data);
+#include "shell_types.h"
+#include <assert.h>
 
 /**
- * string_print - prints contents of a string type.
- * @output_stream: pointer to a stream to print to.
- * @data: the string to print.
+ * get_shell_variable - extract a `shell_variable` type from a string.
+ * @str: the string to read from.
  *
- * Return: number of characters printed.
+ * Return: a `shell_variable` type with both the name and value on success,
+ * a NULL `shell_variable` type on failure.
  */
-int string_print(FILE *output_stream, const void *const data)
+static shell_variable get_shell_variable(view_string str)
 {
-	const view_string *const s = data;
+	view_string t = {0};
+	shell_variable var = {0};
 
-	if (!s)
-		return (fprintf(output_stream, "(null)"));
+	assert(str.s && str.size > 0);
+	str.i = 0;
+	t = _strtok(&str, "=");
+	if (!t.s)
+		return (var);
 
-	return (fprintf(output_stream, "%jd:\"%s\"", s->size, s->s));
+	var.name = _strdup(t.s, t.size);
+	if (!var.name)
+		return (var); /* MALLOC FAIL */
+
+	t.s += t.size + 1;
+	t.size = str.size - (t.size + 1);
+	var.value = _strdup(t.s, t.size);
+	if (!var.value)
+		var.name = _free(var.name); /* MALLOC FAIL */
+
+	return (var);
 }
 
 /**
- * sll_print - print all nodes of a doubly linked list.
- * @output_stream: pointer to a stream to output to.
- * @head: head of the doubly linked list to print.
- * @print_data: function that will be called to print data in nodes.
+ * get_shell_command - extract a `shell_command` type from a `queue` of tokens.
+ * @tokens: `queue` of strings.
  *
- * Return: total bytes printed, negative number on error.
+ * Return: a `shell_command` type with the command name and its arguments on
+ * success, a NULL `shell_command` type on failure.
  */
-long int sll_print(
-	FILE *output_stream, single_link_node const *const head,
-	print_func *print_data)
+static shell_command get_shell_command(queue *tokens)
 {
-	long int total_bytes = 0;
-	int bytes_printed = 0;
-	single_link_node const *walk = head;
+	view_string *tok = NULL;
+	shell_command cmd = {0};
+	intmax_t argv_i = 0;
 
-	if (!output_stream || !head)
-		return (-1);
+	assert(tokens);
+	tok = dequeue(tokens);
+	if (!tok)
+		return (cmd);
 
-	if (print_data)
-		bytes_printed = print_data(output_stream, walk->data);
-	else
-		bytes_printed = fprintf(output_stream, "%p", walk->data);
-
-	if (bytes_printed < 0)
-		return (bytes_printed);
-
-	total_bytes += bytes_printed;
-	walk = walk->next;
-	while (walk)
+	cmd.cmd = _strdup(tok->s, tok->size);
+	if (!cmd.cmd) /* MALLOC FAIL */
 	{
-		bytes_printed = fprintf(output_stream, " --> ");
-		if (bytes_printed < 0)
-			return (bytes_printed);
-
-		total_bytes += bytes_printed;
-		if (print_data)
-			bytes_printed = print_data(output_stream, walk->data);
-		else
-			bytes_printed = fprintf(output_stream, "%p", walk->data);
-
-		if (bytes_printed < 0)
-			return (bytes_printed);
-
-		total_bytes += bytes_printed;
-		walk = walk->next;
+		cmd.cmd = _free(cmd.cmd);
+		return (cmd);
 	}
 
-	bytes_printed = fprintf(output_stream, "\n");
-	if (bytes_printed < 0)
-		return (bytes_printed);
+	if (tokens->length < 1)
+		return (cmd);
 
-	return (total_bytes + bytes_printed);
-}
+	cmd.argv = queue_to_array(tokens, string_to_cstr, _free);
+	if (!cmd.argv)
+		cmd.cmd = _free(cmd.cmd);
 
-/**
- * queue_print - print all nodes of a queue.
- * @output_stream: pointer to the stream to print to.
- * @q: the queue to print.
- * @print_data: function that will be called to print data in nodes.
- *
- * Return: total bytes printed, negative number on error.
- */
-long int queue_print(
-	FILE *output_stream, const queue *const q, print_func *print_data)
-{
-	if (!output_stream || !q)
-		return (-1);
-
-	if (!q->head)
-		return (fprintf(output_stream, "(NULL)\n"));
-
-	return (sll_print(output_stream, q->head, print_data));
+	return (cmd);
 }
 
 /**
  * interprate - execute command in tokens.
  * @tokens: list of tokens from input.
+ *
+ * Return: -1 on error.
  */
-void interprate(queue *tokens)
+int interprate(queue *tokens)
 {
-	queue_print(stdout, tokens, string_print);
+	view_string *tok = NULL;
+	queue shell_vars = {0};
+	shell_variable var = {0};
+	shell_command cmd = {0};
+
+	if (!tokens)
+		return (-1);
+
+	tok = dequeue(tokens);
+	while (tok && _strstr(tok->s, "=").s)
+	{
+		var = get_shell_variable(*tok);
+		if (var.name)
+			enqueue(&shell_vars, &var, NULL);
+
+		tok = dequeue(tokens);
+	}
+
+	cmd = get_shell_command(tokens);
+	if (cmd.cmd)
+	{
+		if (shell_vars.length > 0)
+		/* Add variable */
+	}
 }

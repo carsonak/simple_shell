@@ -1,8 +1,7 @@
 #include "string.h"
-#include "alloc.h"
 
 /**
- * string_dup - duplicates a `string` data type.
+ * string_dup - copies a `view_string` data type into a `string` data type.
  * @data: the string to duplicate.
  *
  * Return: pointer to the duplicated string.
@@ -20,7 +19,7 @@ void *string_dup(const void *const data)
 		return (NULL);
 
 	dup->size = src->size;
-	dup->s = _memcpy(_malloc(sizeof(*dup->s) * src->size + 1), src->s, src->size);
+	dup->s = _strdup(src->s, src->size);
 	if (!dup->s)
 		return (_free(dup));
 
@@ -29,12 +28,46 @@ void *string_dup(const void *const data)
 }
 
 /**
+ * string_to_cstr - extract a C string from a `string` type.
+ * @data: pointer to the `string` type.
+ *
+ * Return: pointer to the duplicated string, NULL on failure.
+ */
+void *string_to_cstr(void *data)
+{
+	string *s = data;
+
+	if (!s || !s->s || s->size < 1)
+		return (NULL);
+
+	return (_strdup(s->s, s->size));
+}
+
+/**
+ * cstr_to_string - instantiate a string type with a C string.
+ * @cstr: a null terminated char array.
+ *
+ * Return: pointer to the created string type, NULL on error.
+ */
+void *cstr_to_string(const char *const cstr)
+{
+	view_string str = {0};
+
+	if (!cstr)
+		return (NULL);
+
+	str.s = cstr;
+	str.size = _strlen(cstr) + 1;
+	return (string_dup(&str));
+}
+
+/**
  * string_delete - frees a `string` data type from memory.
  * @data: pointer to the string to free.
  */
 void string_delete(void *const data)
 {
-	view_string *s = data;
+	string *s = data;
 
 	if (s)
 	{
