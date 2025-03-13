@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include "string.h"
+#include "strings.h"
 
 #define _STRTOK_FILTER_SIZE 256U
 

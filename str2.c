@@ -1,4 +1,4 @@
-#include "string.h"
+#include "strings.h"
 #include "alloc.h"
 
 /**
@@ -10,10 +10,14 @@
  */
 char *_strdup(const char *const str, intmax_t size)
 {
+	char *new_str = NULL;
+
 	if (!str || size < 1)
 		return (NULL);
 
-	return (_memncpy(_malloc(sizeof(*str) * size + 1), str, str));
+	new_str = _memncpy(_malloc(sizeof(*str) * size + 1), str, size);
+	new_str[size] = '\0';
+	return (new_str);
 }
 
 /**

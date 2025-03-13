@@ -33,6 +33,7 @@ static int process_input(FILE *input_stream)
 		char *raw_line = NULL;
 		size_t raw_line_size = 0;
 		queue *tokens = NULL;
+		int ret_val = 0;
 
 		(void)lines_read;
 		if (using_terminal == 1)
@@ -56,11 +57,20 @@ static int process_input(FILE *input_stream)
 		if (!tokens)
 			return (-1);
 
-		interprate(tokens);
+		ret_val = interprate(tokens);
 		tokens = queue_delete(tokens, string_delete);
+		if (ret_val < 0)
+			return (ret_val);
 	}
 
 	return (0);
+}
+
+static void *dup_str(void const *const data)
+{
+	const char *const str = data;
+
+	return (_strdup(str, _strlen(str)));
 }
 
 /**
@@ -72,6 +82,13 @@ static int process_input(FILE *input_stream)
  */
 int main(int argc, char *argv[])
 {
+	int ret_val = 0;
+	intmax_t env_len = get_env_len();
+	char **env_dup = (char **)dup_2D_array((void **)environ, env_len, dup_str, free);
+
+	environ = env_dup;
 	parse_argv(argc, argv);
-	return (process_input(stdin));
+	ret_val = process_input(stdin);
+	environ = delete_2D_array((void **)environ, env_len, free);
+	return (ret_val);
 }

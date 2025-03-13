@@ -91,31 +91,6 @@ void *queue_delete(queue *const nullable_ptr, delete_func *free_data)
 }
 
 /**
- * delete_2D_array - free a 2 dimensional array from memory.
- * @array: a 2 dimensional array.
- * @size: number of columns in the array, should be greater than 0.
- * @free_row: pointer to a function that will be used to free the rows.
- *
- * Return: NULL always.
- */
-static void *delete_2D_array(
-	void **array, intmax_t size, delete_func *free_row)
-{
-	intmax_t a_i = 0;
-
-	if (!array || size < 1)
-		return (NULL);
-
-	for (a_i = 0; a_i < size; ++a_i)
-	{
-		free_row(array[a_i]);
-		array[a_i] = NULL;
-	}
-
-	return (_free(array));
-}
-
-/**
  * queue_to_array - create an array from a queue.
  * @q: the queue.
  * @copy_data: optional pointer to a function that will be used to duplicate

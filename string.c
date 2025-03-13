@@ -1,4 +1,4 @@
-#include "string.h"
+#include "strings.h"
 
 /**
  * string_dup - copies a `view_string` data type into a `string` data type.
@@ -33,9 +33,9 @@ void *string_dup(const void *const data)
  *
  * Return: pointer to the duplicated string, NULL on failure.
  */
-void *string_to_cstr(void *data)
+void *string_to_cstr(const void *const data)
 {
-	string *s = data;
+	const string *const s = data;
 
 	if (!s || !s->s || s->size < 1)
 		return (NULL);
@@ -71,7 +71,7 @@ void string_delete(void *const data)
 
 	if (s)
 	{
-		s->s = (const char *)_free(s->s);
+		s->s = _free(s->s);
 		s->size = 0;
 	}
 

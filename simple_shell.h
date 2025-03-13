@@ -5,18 +5,17 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <inttypes.h> /* intmax_t */
-#include <stdio.h>    /* getline */
-#include <sys/wait.h> /* wait */
-#include <unistd.h>   /* fork, getpid */
+#include <stdio.h>    /* getline, perror */
+#include <sys/wait.h> /* wait, waitpid */
+#include <unistd.h>   /* fork, getpid, execve */
 
 #include "alloc.h"
-#include "singly_linked_list.h"
 #include "queue.h"
-#include "string.h"
+#include "_env.h"
 
 #define SIMPLE_SHELL_PROMPT "@s_s> "
 
 queue *tokenise(const char *const command_str, intmax_t size);
-void interprate(queue *tokens);
+int interprate(queue *tokens);
 
 #endif /* SIMPLE_SHELL_H */

@@ -1,4 +1,4 @@
-#include "string.h"
+#include "strings.h"
 
 /**
  * overlaps_greater_indices - checks if a block of memory overlaps

@@ -1,6 +1,6 @@
 #include <limits.h>
 
-#include "string.h"
+#include "strings.h"
 
 /**
  * string_readc - returns current character and advances the string cursor.

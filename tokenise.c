@@ -49,7 +49,7 @@ static view_string get_single_quoted_str(view_string *str)
 	assert(str->s && str->i > -1 && str->size > 0);
 	quote.s = &str->s[str->i];
 	c = string_readc(str);
-	assert(str->s[str->i] == '\'');
+	assert(c == '\'');
 	c = string_readc(str);
 	for (quote.size = 0; c > -1 && c != '\'';
 		 ++quote.size, c = string_readc(str))

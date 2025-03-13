@@ -4,6 +4,8 @@
 #include <inttypes.h> /* intmax_t */
 #include <stddef.h>	  /* size_t */
 
+#include "alloc.h"
+
 /**
  * struct string - a mutable string data type.
  * @size: size of the string in bytes, should not be less than 0.
@@ -36,7 +38,7 @@ typedef struct view_string view_string;
 void string_delete(void *const data);
 void *string_dup(const void *const data);
 void *cstr_to_string(const char *const cstr);
-void *string_to_cstr(void *data);
+void *string_to_cstr(const void *const data);
 
 char string_readc(view_string *const s);
 char string_readp(view_string *const s);

@@ -4,20 +4,6 @@
 #include "alloc.h"
 
 /**
- * dup_func - a function that duplicates an object.
- * @data: pointer to the object to be duplicated.
- *
- * Return: pointer to the duplicate, NULL on failure.
- */
-typedef void *(dup_func)(void const *const data);
-
-/**
- * delete_func - a function that deletes an object.
- * @data: pointer to the object to delete.
- */
-typedef void(delete_func)(void *const data);
-
-/**
  * struct single_link_node - a singly linked list node.
  * @data: data that the node holds.
  * @next: pointer to the next node.
