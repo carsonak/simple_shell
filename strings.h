@@ -1,8 +1,7 @@
-#ifndef SIMPLE_SHELL_UTILITY_FUNCTIONS
-#define SIMPLE_SHELL_UTILITY_FUNCTIONS
+#ifndef SIMPLE_SHELL_STRINGS_H
+#define SIMPLE_SHELL_STRINGS_H
 
 #include <inttypes.h> /* intmax_t */
-#include <stddef.h>	  /* size_t */
 
 #include "alloc.h"
 
@@ -49,10 +48,14 @@ char string_peekn(view_string const *const s);
 view_string _strstr(const char *const haystack, const char *const needle);
 view_string _strtok(
 	view_string *const str, const char *const delimeters);
-char *_memset(char *const mem, const char byte, intmax_t size);
-char *_memncpy(char *const dest, const char *const src, const intmax_t n);
-char *_strdup(const char *const str, intmax_t size);
-size_t _strlen(const char *const s);
+intmax_t _strlen(const char *const s);
 short int _strncmp(const char *s1, const char *s2, intmax_t len);
 
-#endif /* SIMPLE_SHELL_UTILITY_FUNCTIONS */
+char *_memset(char *const mem, const char byte, intmax_t size);
+char *_memcpy(char *const dest, const char *const src, const intmax_t n);
+char *_strncat(char *dest, const char *const s, intmax_t n);
+char *_strdup(const char *const str, intmax_t size);
+char *strjoin(intmax_t n, ...);
+char *strconcat(const char *const s1, const char *const s2);
+
+#endif /* SIMPLE_SHELL_STRINGS_H */

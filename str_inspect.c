@@ -2,6 +2,82 @@
 
 #include "strings.h"
 
+/**
+ * _strlen - counts number of characters in a string upto
+ * the terminating null byte.
+ * @s: pointer to the string.
+ *
+ * Return: length of the string.
+ */
+intmax_t _strlen(const char *const s)
+{
+	intmax_t i;
+
+	if (!s)
+		return (0);
+
+	for (i = 0; s[i]; ++i)
+		;
+
+	return (i);
+}
+
+/**
+ * _strncmp - compares the first `len` characters of two strings.
+ * @s1: pointer to the first string.
+ * @s2: pointer to the second string.
+ * @len: number of characters to compare, cannot be less than 0.
+ *
+ * Return: 0 if strings are equal,
+ * the difference of the first differing characters otherwise.
+ */
+short int _strncmp(const char *s1, const char *s2, intmax_t len)
+{
+	if (!s1 || !s2 || len < 1)
+		return (0);
+
+	while (len > 0 && !(*s1 - *s2))
+	{
+		++s1;
+		++s2;
+		--len;
+	}
+
+	return (*s1 - *s2);
+}
+
+/**
+ * _strstr - searches for a substring in a given string.
+ * @haystack: the string.
+ * @needle: the substring to search for.
+ *
+ * Return: a `view_string` pointing to the start of substring if found,
+ * otherwise the `view_string` points to NULL.
+ */
+view_string _strstr(const char *const haystack, const char *const needle)
+{
+	view_string s = {0};
+	intmax_t n_i = 0, h_i = 0;
+
+	if (!haystack || !needle)
+		return (s);
+
+	for (h_i = 0; haystack[h_i]; ++h_i)
+	{
+		for (n_i = 0; needle[n_i] && needle[n_i] == haystack[h_i]; n_i++)
+			;
+
+		if (needle[n_i] == '\0')
+		{
+			s.s = &haystack[h_i];
+			s.size = n_i;
+			return (s);
+		}
+	}
+
+	return (s);
+}
+
 #define _STRTOK_FILTER_SIZE 256U
 
 /**

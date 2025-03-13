@@ -63,7 +63,7 @@ void *_realloc(void *mem, intmax_t size)
 	if (size == 0)
 		return (_free(mem));
 
-	new_mem = _memncpy(_malloc(size), mem, size);
+	new_mem = _memcpy(_malloc(size), mem, size);
 	if (!new_mem)
 		return (NULL);
 

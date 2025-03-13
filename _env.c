@@ -58,9 +58,9 @@ int _setenv(shell_variable var)
 	if (!env_var)
 		return (-1);
 
-	_memncpy(env_var, var.name, name_len);
-	_memncpy(env_var + name_len, "=", 1);
-	_memncpy(env_var + name_len + 1, var.value, value_len);
+	_memcpy(env_var, var.name, name_len);
+	_memcpy(env_var + name_len, "=", 1);
+	_memcpy(env_var + name_len + 1, var.value, value_len);
 	env_var[name_len + 1 + value_len] = '\0';
 	insert_index = _getenv(var.name);
 	if (insert_index > -1)

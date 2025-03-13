@@ -16,14 +16,14 @@ static unsigned char overlaps_greater_indices(
 }
 
 /**
- * _memncpy - copies `n` bytes from one memory block to another.
+ * _memcpy - copies `n` bytes from one memory block to another.
  * @dest: the destination memory.
  * @src: source memory block.
  * @n: number of bytes to copy.
  *
  * Return: returns pointer to `dest`.
  */
-char *_memncpy(char *const dest, const char *const src, const intmax_t n)
+char *_memcpy(char *const dest, const char *const src, const intmax_t n)
 {
 	intmax_t i;
 
@@ -67,45 +67,52 @@ char *_memset(char *const mem, const char byte, intmax_t size)
 }
 
 /**
- * _strlen - counts number of characters in a string upto
- * the terminating null byte.
- * @s: pointer to the string.
+ * _strdup - duplicate a string in memory.
+ * @str: the string to duplicate.
+ * @size: size of the string.
  *
- * Return: length of the string.
+ * Return: pointer to the duplicated string, NULL on error.
  */
-size_t _strlen(const char *const s)
+char *_strdup(const char *const str, intmax_t size)
 {
-	size_t i;
+	char *new_str = NULL;
 
-	if (!s)
-		return (0);
+	if (!str || size < 1)
+		return (NULL);
 
-	for (i = 0; s[i]; ++i)
-		;
-
-	return (i);
+	new_str = _memcpy(_malloc(sizeof(*str) * size + 1), str, size);
+	new_str[size] = '\0';
+	return (new_str);
 }
 
 /**
- * _strncmp - compares the first `len` characters of two strings.
- * @s1: pointer to the first string.
- * @s2: pointer to the second string.
- * @len: number of characters to compare, cannot be less than 0.
+ * _strncat - concatenates two strings by appending at most `n` bytes of `s`
+ * to the end of `dest` and then terminates with a '\0'.
+ * @dest: pointer to a memory block with the first string and enough space for
+ * atleast `n` + 1 bytes of the second.
+ * @s: the second string.
+ * @n: maximum number of bytes from `s` to append.
  *
- * Return: 0 if strings are equal,
- * the difference of the first differing characters otherwise.
+ * Return: pointer to the concatenated strings, NULL if both pointers are NULL.
  */
-short int _strncmp(const char *s1, const char *s2, intmax_t len)
+char *_strncat(char *dest, const char *const s, intmax_t n)
 {
-	if (!s1 || !s2 || len < 1)
-		return (0);
+	intmax_t dest_len = _strlen(dest);
+	intmax_t s_len = _strlen(s);
 
-	while (len > 0 && !(*s1 - *s2))
-	{
-		++s1;
-		++s2;
-		--len;
-	}
+	if (!dest && !s)
+		return (NULL);
 
-	return (*s1 - *s2);
+	if (dest_len < 1)
+		return ((char *)s);
+
+	if (s_len < 1 || n < 1)
+		return (dest);
+
+	if (s_len > n)
+		s_len = n;
+
+	dest = _memcpy(dest + dest_len, s, s_len);
+	dest[dest_len + s_len] = '\0';
+	return (dest);
 }
