@@ -2,6 +2,13 @@
 
 #include <assert.h>
 
+/**
+ * get_double_quoted_str - return a double quoted ("") string.
+ * @str: pointer to the start of the quoted string.
+ *
+ * Return: `view_string` type with the quoted string,
+ * NULL `view_string` on error.
+ */
 static view_string get_double_quoted_str(view_string *str)
 {
 	view_string quote = {0};
@@ -40,6 +47,13 @@ static view_string get_double_quoted_str(view_string *str)
 	return (quote);
 }
 
+/**
+ * get_single_quoted_str - return a single quoted (') string.
+ * @str: pointer to the start of the quoted string.
+ *
+ * Return: `view_string` type with the quoted string,
+ * NULL `view_string` on error.
+ */
 static view_string get_single_quoted_str(view_string *str)
 {
 	view_string quote = {0};
@@ -66,12 +80,20 @@ static view_string get_single_quoted_str(view_string *str)
 	return (quote);
 }
 
+/**
+ * tokenise - parse a string into shell tokens.
+ * @command_str: the string to parse.
+ * @size: size of the string in bytes.
+ *
+ * Return: a queue of the parsed tokens.
+ */
 queue *tokenise(const char *const command_str, intmax_t size)
 {
 	view_string str = {0}, tok = {0};
 	queue *tokens = queue_new();
 
-	assert(command_str && size > 0);
+	assert(command_str);
+	assert(size > 0);
 	str.s = command_str;
 	str.size = size;
 	if (!tokens)

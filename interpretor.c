@@ -14,7 +14,8 @@ static shell_variable get_shell_variable(view_string str)
 	view_string t = {0};
 	shell_variable var = {0};
 
-	assert(str.s && str.size > 0);
+	assert(str.s);
+	assert(str.size > 0);
 	str.i = 0;
 	t = _strtok(&str, "=");
 	if (!t.s)
@@ -34,40 +35,6 @@ static shell_variable get_shell_variable(view_string str)
 }
 
 /**
- * get_shell_command - extract a `shell_command` type from a `queue` of tokens.
- * @tokens: `queue` of strings.
- *
- * Return: a `shell_command` type with the command name and its arguments on
- * success, a NULL `shell_command` type on failure.
- */
-static shell_command get_shell_command(queue *tokens)
-{
-	view_string *tok = NULL;
-	shell_command cmd = {0};
-
-	assert(tokens);
-	tok = dequeue(tokens);
-	if (!tok)
-		return (cmd);
-
-	cmd.cmd = _strdup(tok->s, tok->size);
-	if (!cmd.cmd) /* MALLOC FAIL */
-	{
-		cmd.cmd = _free(cmd.cmd);
-		return (cmd);
-	}
-
-	if (tokens->length < 1)
-		return (cmd);
-
-	cmd.argv = (char **)queue_to_array(tokens, string_to_cstr, free);
-	if (!cmd.argv) /* MALLOC FAIL */
-		cmd.cmd = _free(cmd.cmd);
-
-	return (cmd);
-}
-
-/**
  * exec_command - fork and call execve on `cmd`.
  * @cmd: path to file to execute.
  * @argv: arguments to the command to execute.
@@ -81,6 +48,9 @@ static unsigned char exec_command(
 	int child_status = 0;
 	pid_t pid = fork();
 
+	assert(cmd);
+	// assert(argv);
+	assert(envp);
 	if (pid == 0)
 	{
 		if (execve(cmd, argv, envp) < 0)
@@ -108,44 +78,75 @@ static unsigned char exec_command(
 	return (1);
 }
 
+void free_shell_variable(void *const data)
+{
+	shell_variable *v = data;
+
+	if (v)
+	{
+		v->name = _free(v->name);
+		v->value = _free(v->value);
+	}
+}
+
 /**
  * interprate - execute command in tokens.
  * @tokens: list of tokens from input.
  *
  * Return: 0 on success, -1 on error.
  */
-int interprate(queue *tokens)
+int interprate(queue *const tokens)
 {
-	view_string *tok = NULL;
 	queue shell_vars = {0};
-	shell_variable var = {0}, *var_ptr = NULL;
-	shell_command cmd = {0};
+	shell_variable *var_ptr = NULL;
+	char **argv = NULL;
+	int return_val = 0;
 
 	if (!tokens)
 		return (-1);
 
-	tok = dequeue(tokens);
-	while (tok && _strstr(tok->s, "=").s)
+	while (tokens->head && _strstr(((view_string *)tokens->head->data)->s, "=").s)
 	{
-		var = get_shell_variable(*tok);
-		if (var.name)
-			enqueue(&shell_vars, &var, NULL);
+		view_string *tok = dequeue(tokens);
+		shell_variable var = get_shell_variable(*tok);
 
-		tok = dequeue(tokens);
+		string_delete(tok);
+		if (!var.name)
+		{
+			return_val = -1;
+			goto clean_exit;
+		}
+
+		enqueue(&shell_vars, &var, NULL);
 	}
 
-	cmd = get_shell_command(tokens);
+	argv = (char **)queue_to_array(tokens, string_to_cstr, free);
+	if (!argv)
+	{
+		return_val = -1;
+		goto clean_exit;
+	}
+
 	var_ptr = dequeue(&shell_vars);
 	while (var_ptr)
 	{
-		if (_setenv(*var_ptr) < 0)
-			return (-1);
+		int setenv_ret = _setenv(*var_ptr);
+
+		free_shell_variable(var_ptr);
+		if (setenv_ret < 0)
+		{
+			return_val = -1;
+			goto clean_exit;
+		}
 
 		var_ptr = dequeue(&shell_vars);
 	}
 
-	if (exec_command(cmd.cmd, cmd.argv, environ) == 0)
-		return (-1);
+	if (exec_command(argv[0], argv, environ) == 0)
+		return_val = -1;
 
-	return (0);
+clean_exit:
+	argv = delete_2D_array((void **)argv, tokens->length, free);
+	queue_clear(&shell_vars, free_shell_variable);
+	return (return_val);
 }

@@ -72,6 +72,7 @@ void string_delete(void *const data)
 	if (s)
 	{
 		s->s = _free(s->s);
+		s->i = 0;
 		s->size = 0;
 	}
 

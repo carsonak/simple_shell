@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "simple_shell.h"
 
 /**
@@ -24,6 +26,7 @@ static int process_input(FILE *input_stream)
 	unsigned char using_terminal = 0;
 	int input_fd = fileno(input_stream);
 
+	assert(input_stream);
 	if (input_fd < 0)
 		return (-1);
 
@@ -37,13 +40,20 @@ static int process_input(FILE *input_stream)
 
 		(void)lines_read;
 		if (using_terminal == 1)
-			printf(SIMPLE_SHELL_PROMPT);
+			ECHOL(SIMPLE_SHELL_PROMPT, sizeof(SIMPLE_SHELL_PROMPT) - 1);
 
+		errno = 0;
 		chars_read = getline(&raw_line, &raw_line_size, input_stream);
 		if (chars_read < 0)
 		{
 			raw_line = _free(raw_line);
-			return (-1);
+			if (errno)
+			{
+				perror("ERROR: process_input");
+				return (-1);
+			}
+
+			return (0);
 		}
 
 		if (raw_line[chars_read - 1] == '\n')

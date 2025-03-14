@@ -22,6 +22,7 @@ struct queue
 typedef struct queue queue;
 
 queue *queue_new(void);
+void queue_clear(queue *const q, delete_func *free_data);
 void *queue_delete(queue *const nullable_ptr, delete_func *free_data);
 single_link_node *enqueue(
 	queue *const q, void *const data, dup_func *copy_data);

@@ -63,11 +63,11 @@ void *dequeue(queue *const q)
 }
 
 /**
- * clear_queue - delete all items in a queue.
+ * queue_clear - delete all items in a queue.
  * @q: the queue to operate on.
  * @free_data: pointer to a function that will be called to free data in nodes.
  */
-static void clear_queue(queue *const q, delete_func *free_data)
+void queue_clear(queue *const q, delete_func *free_data)
 {
 	if (!q)
 		return;
@@ -86,7 +86,7 @@ static void clear_queue(queue *const q, delete_func *free_data)
  */
 void *queue_delete(queue *const nullable_ptr, delete_func *free_data)
 {
-	clear_queue(nullable_ptr, free_data);
+	queue_clear(nullable_ptr, free_data);
 	return (_free(nullable_ptr));
 }
 
