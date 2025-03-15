@@ -8,6 +8,34 @@
 queue *queue_new(void) { return (_calloc(1, sizeof(queue))); }
 
 /**
+ * queue_peek_head - returns pointer to the data at the head node.
+ * @q: pointer to the queue.
+ *
+ * Return: pointer to the data at the head of the queue.
+ */
+void *queue_peek_head(const queue *const q)
+{
+	if (!q || !q->head)
+		return (NULL);
+
+	return (q->head->data);
+}
+
+/**
+ * queue_peek_tail - returns pointer to the data at the tail node.
+ * @q: pointer to the queue.
+ *
+ * Return: pointer to the data at the tail of the queue.
+ */
+void *queue_peek_tail(const queue *const q)
+{
+	if (!q || !q->tail)
+		return (NULL);
+
+	return (q->tail->data);
+}
+
+/**
  * enqueue - add a node to the end of a queue.
  * @q: the queue to operate on.
  * @data: data that the node will hold.

@@ -39,7 +39,7 @@ void *delete_2D_array(
  * Return: the duplicated array on success, NULL on error.
  */
 void **dup_2D_array(
-	void **const array, const intmax_t size,
+	void *const *const array, const intmax_t size,
 	dup_func *copy_data, delete_func *free_data)
 {
 	intmax_t arr_i = 0;

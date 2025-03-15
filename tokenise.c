@@ -90,15 +90,17 @@ static view_string get_single_quoted_str(view_string *str)
 queue *tokenise(const char *const command_str, intmax_t size)
 {
 	view_string str = {0}, tok = {0};
-	queue *tokens = queue_new();
+	queue *tokens = NULL;
 
-	assert(command_str);
-	assert(size > 0);
-	str.s = command_str;
-	str.size = size;
+	if (!command_str || size < 1)
+		return (NULL);
+
+	tokens = queue_new();
 	if (!tokens)
 		return (NULL);
 
+	str.s = command_str;
+	str.size = size;
 	tok = _strtok(&str, " \t");
 	while (tok.s)
 	{

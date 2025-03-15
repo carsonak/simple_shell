@@ -54,20 +54,20 @@ static unsigned char exec_command(
 	if (pid == 0)
 	{
 		if (execve(cmd, argv, envp) < 0)
-			perror("ERROR: exec_command");
+			perror("ERROR: " __FILE__ ":exec_command");
 
 		exit(EXIT_FAILURE);
 	}
 
 	if (pid < 0)
 	{
-		perror("ERROR: exec_command");
+		perror("ERROR: " __FILE__ ":exec_command");
 		return (0);
 	}
 
 	if (waitpid(pid, &child_status, WUNTRACED) < 0)
 	{
-		perror("ERROR: exec_command");
+		perror("ERROR: " __FILE__ ":exec_command");
 		return (0);
 	}
 

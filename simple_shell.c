@@ -17,24 +17,20 @@ static void parse_argv(int argc, char *argv[])
  * process_input - read and execute commands from an input stream.
  * @input_stream: the input stream.
  *
- * Return: -1 on error, 0 otherwise.
+ * Return: 0 on success, 1 on error.
  */
 static int process_input(FILE *input_stream)
 {
 	size_t lines_read = 1;
 	ssize_t chars_read = 0;
 	unsigned char using_terminal = 0;
-	int input_fd = fileno(input_stream);
 
 	assert(input_stream);
-	if (input_fd < 0)
-		return (-1);
-
-	using_terminal = isatty(input_fd);
+	assert(fileno(input_stream) > -1);
+	using_terminal = isatty(fileno(input_stream));
 	for (lines_read = 1; chars_read >= 0; ++lines_read)
 	{
 		char *raw_line = NULL;
-		size_t raw_line_size = 0;
 		queue *tokens = NULL;
 		int ret_val = 0;
 
@@ -42,32 +38,27 @@ static int process_input(FILE *input_stream)
 		if (using_terminal == 1)
 			ECHOL(SIMPLE_SHELL_PROMPT, sizeof(SIMPLE_SHELL_PROMPT) - 1);
 
-		errno = 0;
-		chars_read = getline(&raw_line, &raw_line_size, input_stream);
+		chars_read = _getline(&raw_line, NULL, input_stream);
 		if (chars_read < 0)
 		{
 			raw_line = _free(raw_line);
-			if (errno)
-			{
-				perror("ERROR: process_input");
-				return (-1);
-			}
+			if (chars_read == GETLINE_EOF)
+				return (0);
 
-			return (0);
+			return (1);
 		}
 
 		if (raw_line[chars_read - 1] == '\n')
-		{
-			--chars_read;
-			raw_line[chars_read] = '\0';
-		}
+			raw_line[--chars_read] = '\0';
 
 		tokens = tokenise(raw_line, chars_read);
 		raw_line = _free(raw_line);
 		if (!tokens)
-			return (-1);
+			return (1);
 
-		ret_val = interprate(tokens);
+		if (tokens->length > 0)
+			ret_val = interprate(tokens);
+
 		tokens = queue_delete(tokens, string_delete);
 		if (ret_val < 0)
 			return (ret_val);

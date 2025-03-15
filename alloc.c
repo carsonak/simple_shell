@@ -7,7 +7,7 @@
  *
  * Return: pointer to the allocated memory block, NULL on failure.
  */
-void *_malloc(intmax_t size)
+void *_malloc(const intmax_t size)
 {
 	if (size < 0)
 	{
@@ -26,7 +26,7 @@ void *_malloc(intmax_t size)
  *
  * Return: pointer to the allocated memory block, NULL on failure.
  */
-void *_calloc(intmax_t n, intmax_t type_size)
+void *_calloc(const intmax_t n, const intmax_t type_size)
 {
 	if (n < 0 || type_size < 0)
 		return (NULL);
@@ -53,7 +53,7 @@ void *_free(void *nullable_ptr)
  *
  * Return: pointer to the resized memory on success, NULL on failure.
  */
-void *_realloc(void *mem, intmax_t size)
+void *_realloc(void *mem, const intmax_t size)
 {
 	void *new_mem = NULL;
 
@@ -79,7 +79,7 @@ void *_realloc(void *mem, intmax_t size)
  *
  * Return: pointer to the resized memory on success, NULL on failure.
  */
-void *_realloc_free_on_fail(void *mem, intmax_t size)
+void *_realloc_free_on_fail(void *mem, const intmax_t size)
 {
 	void *new_mem = _realloc(mem, size);
 
