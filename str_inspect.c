@@ -90,7 +90,7 @@ static void initialise_filter(
 	unsigned char *const filter, const char *to_filter)
 {
 	assert(filter && to_filter);
-	_memset((char *)filter, 0, _STRTOK_FILTER_SIZE);
+	_memset(filter, 0, _STRTOK_FILTER_SIZE);
 	while (*to_filter)
 	{
 		filter[(unsigned char)*to_filter] = 1;

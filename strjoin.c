@@ -21,7 +21,8 @@ char *strjoin(intmax_t n, ...)
 		intmax_t str_n_len = _strlen(str_n);
 
 		long_str_len += str_n_len;
-		long_str = _realloc_free_on_fail(long_str, long_str_len + 1);
+		long_str = _realloc_free_on_fail(
+			long_str, long_str_len + 1, long_str_len - str_n_len);
 		if (!long_str)
 			break;
 

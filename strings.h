@@ -39,8 +39,8 @@ void *string_dup(const void *const data);
 void *cstr_to_string(const char *const cstr);
 void *string_to_cstr(const void *const data);
 
-char string_readc(view_string *const s);
-char string_readp(view_string *const s);
+char string_readc(view_string * const s);
+char string_readp(view_string * const s);
 char string_peekc(view_string const *const s);
 char string_peekp(view_string const *const s);
 char string_peekn(view_string const *const s);
@@ -51,8 +51,8 @@ view_string _strtok(
 intmax_t _strlen(const char *const s);
 short int _strncmp(const char *s1, const char *s2, intmax_t len);
 
-char *_memset(char *const mem, const char byte, intmax_t size);
-char *_memcpy(char *const dest, const char *const src, const intmax_t n);
+void *_memset(void *const mem, const char byte, intmax_t size);
+void *_memcpy(void *const dest, const void *const src, const intmax_t n);
 char *_strncat(char *dest, const char *const s, intmax_t n);
 char *_strdup(const char *const str, intmax_t size);
 char *strjoin(intmax_t n, ...);

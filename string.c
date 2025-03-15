@@ -8,7 +8,7 @@
  */
 void *string_dup(const void *const data)
 {
-	const view_string *const src = data;
+	const view_string * const src = data;
 	string *dup;
 
 	if (!src)

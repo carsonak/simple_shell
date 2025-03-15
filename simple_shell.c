@@ -14,12 +14,42 @@ static void parse_argv(int argc, char *argv[])
 }
 
 /**
+ * get_command - retrieve command from input_stream.
+ * @line: pointer to a buffer to store the command.
+ * @input_stream: pointer to an open stream.
+ *
+ * Return: number of characters in the command on success, EOF or -1 on error.
+ */
+static ssize_t get_command(char **const line, FILE *input_stream)
+{
+	ssize_t chars_read = 0;
+
+	assert(line);
+	assert(input_stream);
+	chars_read = _getline(line, NULL, input_stream);
+	if (chars_read < 0)
+	{
+		*line = _free(*line);
+		if (chars_read == GETLINE_EOF)
+			return (GETLINE_EOF);
+
+		return (-1);
+	}
+
+	if ((*line)[chars_read - 1] == '\n')
+		(*line)[--chars_read] = '\0';
+
+	return (chars_read);
+}
+
+/**
  * process_input - read and execute commands from an input stream.
  * @input_stream: the input stream.
+ * @environ: pointer to an `environment_vars` struct.
  *
  * Return: 0 on success, 1 on error.
  */
-static int process_input(FILE *input_stream)
+static int process_input(FILE *input_stream, environment_vars * const environ)
 {
 	size_t lines_read = 1;
 	ssize_t chars_read = 0;
@@ -30,7 +60,7 @@ static int process_input(FILE *input_stream)
 	using_terminal = isatty(fileno(input_stream));
 	for (lines_read = 1; chars_read >= 0; ++lines_read)
 	{
-		char *raw_line = NULL;
+		char *line = NULL;
 		queue *tokens = NULL;
 		int ret_val = 0;
 
@@ -38,26 +68,20 @@ static int process_input(FILE *input_stream)
 		if (using_terminal == 1)
 			ECHOL(SIMPLE_SHELL_PROMPT, sizeof(SIMPLE_SHELL_PROMPT) - 1);
 
-		chars_read = _getline(&raw_line, NULL, input_stream);
+		chars_read = get_command(&line, input_stream);
+		if (chars_read == GETLINE_EOF)
+			return (0);
+
 		if (chars_read < 0)
-		{
-			raw_line = _free(raw_line);
-			if (chars_read == GETLINE_EOF)
-				return (0);
-
 			return (1);
-		}
 
-		if (raw_line[chars_read - 1] == '\n')
-			raw_line[--chars_read] = '\0';
-
-		tokens = tokenise(raw_line, chars_read);
-		raw_line = _free(raw_line);
+		tokens = tokenise(line, chars_read);
+		line = _free(line);
 		if (!tokens)
 			return (1);
 
 		if (tokens->length > 0)
-			ret_val = interprate(tokens);
+			ret_val = interprate(tokens, environ);
 
 		tokens = queue_delete(tokens, string_delete);
 		if (ret_val < 0)
@@ -67,6 +91,12 @@ static int process_input(FILE *input_stream)
 	return (0);
 }
 
+/**
+ * dup_str - wrapper for `_strdup`.
+ * @data: a character pointer.
+ *
+ * Return: the duplicated string.
+ */
 static void *dup_str(void const *const data)
 {
 	const char *const str = data;
@@ -78,18 +108,22 @@ static void *dup_str(void const *const data)
  * main - Entry point
  * @argc: number of arguments passed to the program.
  * @argv: pointer to the strings of command line arguments.
+ * @envp: array of environment variables.
  *
  * Return: 0
  */
-int main(int argc, char *argv[])
+int main(int argc, char *argv[], char *envp[])
 {
 	int ret_val = 0;
-	intmax_t env_len = get_env_len();
-	char **env_dup = (char **)dup_2D_array((void **)environ, env_len, dup_str, free);
+	environment_vars environ = {0};
 
-	environ = env_dup;
+	for (environ.len = 0; envp[environ.len]; ++environ.len)
+		;
+
+	environ.env = (char **)dup_2D_array(
+		(void **)envp, environ.len, dup_str, free);
 	parse_argv(argc, argv);
-	ret_val = process_input(stdin);
-	environ = delete_2D_array((void **)environ, env_len, free);
+	ret_val = process_input(stdin, &environ);
+	environ.env = delete_2D_array((void **)environ.env, environ.len, free);
 	return (ret_val);
 }

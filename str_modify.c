@@ -23,37 +23,41 @@ static unsigned char overlaps_greater_indices(
  *
  * Return: returns pointer to `dest`.
  */
-char *_memcpy(char *const dest, const char *const src, const intmax_t n)
+void *_memcpy(void *const dest, const void *const src, const intmax_t n)
 {
+	const char *s = src;
+	char *d = dest;
 	intmax_t i;
 
-	if (!dest || !src || n <= 0)
-		return (dest);
+	if (!d || !s || n <= 0)
+		return (d);
 
-	if (overlaps_greater_indices(dest, src, n) == 1)
+	if (overlaps_greater_indices(d, s, n) == 1)
 	{
 		for (i = n; i > 0; --i)
-			dest[i - 1] = src[i - 1];
+			d[i - 1] = s[i - 1];
 	}
 	else
 	{
 		for (i = 0; i < n; ++i)
-			dest[i] = src[i];
+			d[i] = s[i];
 	}
 
-	return (dest);
+	return (d);
 }
 
 /**
  * _memset - fills a memory block with a constant byte.
- * @mem: pointer to the memory block.
+ * @mem_block: pointer to the memory block.
  * @byte: byte to fill block with.
  * @size: size in bytes to fill.
  *
  * Return: pointer to the modified memory block.
  */
-char *_memset(char *const mem, const char byte, intmax_t size)
+void *_memset(void *const mem_block, const char byte, intmax_t size)
 {
+	char *const mem = mem_block;
+
 	if (!mem || size <= 0)
 		return (mem);
 

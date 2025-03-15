@@ -12,7 +12,7 @@
  *
  * Return: the current character, -1 on error.
  */
-char string_readc(view_string *const s)
+char string_readc(view_string * const s)
 {
 	if (!s || s->i < 0 || s->size <= 0 || s->i > s->size)
 		return (-1);
@@ -34,7 +34,7 @@ char string_readc(view_string *const s)
  *
  * Return: the previous character, -1 on error.
  */
-char string_readp(view_string *const s)
+char string_readp(view_string * const s)
 {
 	if (!s || s->i < 0 || s->size <= 0 || s->i > s->size)
 		return (-1);

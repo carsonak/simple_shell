@@ -104,38 +104,6 @@ void *sln_remove(single_link_node *const node)
 }
 
 /**
- * sln_swap_data - replace data in a node.
- * @node: pointer to the node to modify.
- * @data: pointer to the data to swap in.
- * @copy_data: function that will be called to duplicate data, if NULL
- * only pointer to `data` is stored.
- *
- * Return: pointer to the old data in node, NULL on failure.
- */
-void *sln_swap_data(
-	single_link_node *const node, void *const data, dup_func *copy_data)
-{
-	void *old_data = NULL;
-
-	if (!node)
-		return (NULL);
-
-	old_data = node->data;
-	node->data = data;
-	if (copy_data)
-	{
-		node->data = copy_data(data);
-		if (!node->data && data)
-		{
-			node->data = old_data;
-			return (NULL);
-		}
-	}
-
-	return (old_data);
-}
-
-/**
  * sll_clear - delete a doubly linked list from memory.
  * @head: pointer to the head of the doubly linked list.
  * @free_data: function that will be called to free data in the nodes.

@@ -49,21 +49,22 @@ void *_free(void *nullable_ptr)
 /**
  * _realloc - resize a memory block to size.
  * @mem: pointer to the memory block.
- * @size: size to resize to.
+ * @new_size: size to resize to.
+ * @old_size: old size of the memory block.
  *
  * Return: pointer to the resized memory on success, NULL on failure.
  */
-void *_realloc(void *mem, const intmax_t size)
+void *_realloc(void *mem, const intmax_t new_size, const intmax_t old_size)
 {
 	void *new_mem = NULL;
 
-	if (size < 0)
+	if (new_size < 0)
 		return (NULL);
 
-	if (size == 0)
+	if (new_size == 0)
 		return (_free(mem));
 
-	new_mem = _memcpy(_malloc(size), mem, size);
+	new_mem = _memcpy(_malloc(new_size), mem, old_size);
 	if (!new_mem)
 		return (NULL);
 
@@ -75,13 +76,15 @@ void *_realloc(void *mem, const intmax_t size)
  * _realloc_free_on_fail - resize a memory block to size,
  * free original memory on fail.
  * @mem: pointer to the memory block.
- * @size: size in bytes to resize to.
+ * @new_size: size in bytes to resize to.
+ * @old_size: old size of the memory block.
  *
  * Return: pointer to the resized memory on success, NULL on failure.
  */
-void *_realloc_free_on_fail(void *mem, const intmax_t size)
+void *_realloc_free_on_fail(
+	void *mem, const intmax_t new_size, const intmax_t old_size)
 {
-	void *new_mem = _realloc(mem, size);
+	void *new_mem = _realloc(mem, new_size, old_size);
 
 	if (!new_mem)
 		return (_free(mem));

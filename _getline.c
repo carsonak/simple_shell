@@ -35,7 +35,7 @@ static ssize_t read_into_buffer(string *buffer, const int fd)
  *
  * Return: number of characters in the extracted line, -1 on error.
  */
-ssize_t getline_from_buffer(view_string *const buffer, string *const dest)
+ssize_t getline_from_buffer(view_string * const buffer, string * const dest)
 {
 	ssize_t line_size = 0;
 	char c = 0;
@@ -79,7 +79,7 @@ ssize_t getline_from_buffer(view_string *const buffer, string *const dest)
  *
  * Return: number of characters read, -2 on EOF, -1 on error.
  */
-ssize_t _getline(char **const lineptr, size_t *const n, FILE *const stream)
+ssize_t _getline(char **const lineptr, size_t * const n, FILE * const stream)
 {
 	static char buffer[GETLINE_BUFFER_SIZE];
 	static string buf_string;

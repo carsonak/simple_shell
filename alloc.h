@@ -22,8 +22,9 @@ typedef void(delete_func)(void *const data);
 void *_malloc(const intmax_t size);
 void *_calloc(const intmax_t n, const intmax_t type_size);
 void *_free(void *nullable_ptr);
-void *_realloc(void *mem, const intmax_t size);
-void *_realloc_free_on_fail(void *mem, const intmax_t size);
+void *_realloc(void *mem, const intmax_t size, const intmax_t old_size);
+void *_realloc_free_on_fail(
+	void *mem, const intmax_t size, const intmax_t old_size);
 void *delete_2D_array(
 	void **array, intmax_t size, delete_func *free_row);
 void **dup_2D_array(

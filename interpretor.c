@@ -3,35 +3,43 @@
 #include <assert.h>
 
 /**
- * get_shell_variable - extract a `shell_variable` type from a string.
- * @str: the string to read from.
- *
- * Return: a `shell_variable` type with both the name and value on success,
- * a NULL `shell_variable` type on failure.
+ * get_shell_variables - identify and retrieve shell variables from a
+ * list of tokens.
+ * @shell_vars: queue for storing the shell variables.
+ * @tokens: the tokens to check.
  */
-static shell_variable get_shell_variable(view_string str)
+static void get_shell_variables(queue *shell_vars, queue *tokens)
 {
-	view_string t = {0};
-	shell_variable var = {0};
+	assert(shell_vars);
+	assert(tokens);
+	while (tokens->head &&
+		   _strstr(((view_string *)queue_peek_head(tokens))->s, "=").s)
+		enqueue(shell_vars, dequeue(tokens), NULL);
+}
 
-	assert(str.s);
-	assert(str.size > 0);
-	str.i = 0;
-	t = _strtok(&str, "=");
-	if (!t.s)
-		return (var);
+/**
+ * export_shell_variables - export the given variables to the environment.
+ * @shell_vars: list of shell variables to export.
+ * @environ: pointer to an `environment_vars` struct.
+ *
+ * Return: 0 on success, -1 on error.
+ */
+static int export_shell_variables(queue *shell_vars, environment_vars *environ)
+{
+	view_string *var_ptr = dequeue(shell_vars);
 
-	var.name = _strdup(t.s, t.size);
-	if (!var.name)
-		return (var); /* MALLOC FAIL */
+	while (var_ptr)
+	{
+		int setenv_ret = _setenv(environ, var_ptr);
 
-	t.s += t.size + 1;
-	t.size = str.size - (t.size + 1);
-	var.value = _strdup(t.s, t.size);
-	if (!var.value)
-		var.name = _free(var.name); /* MALLOC FAIL */
+		string_delete(var_ptr);
+		if (setenv_ret < 0)
+			return (-1);
 
-	return (var);
+		var_ptr = dequeue(shell_vars);
+	}
+
+	return (0);
 }
 
 /**
@@ -40,17 +48,14 @@ static shell_variable get_shell_variable(view_string str)
  * @argv: arguments to the command to execute.
  * @envp: environment variables to the command.
  *
- * Return: 1 on success, 0 on failure.
+ * Return: 0 on success, -1 on failure.
  */
-static unsigned char exec_command(
+static int exec_command(
 	const char *const cmd, char *const *const argv, char *const *const envp)
 {
 	int child_status = 0;
 	pid_t pid = fork();
 
-	assert(cmd);
-	// assert(argv);
-	assert(envp);
 	if (pid == 0)
 	{
 		if (execve(cmd, argv, envp) < 0)
@@ -62,91 +67,57 @@ static unsigned char exec_command(
 	if (pid < 0)
 	{
 		perror("ERROR: " __FILE__ ":exec_command");
-		return (0);
+		return (-1);
 	}
 
 	if (waitpid(pid, &child_status, WUNTRACED) < 0)
 	{
 		perror("ERROR: " __FILE__ ":exec_command");
-		return (0);
+		return (-1);
 	}
 
 	if (WIFSIGNALED(child_status) ||
 		(WIFEXITED(child_status) && WEXITSTATUS(child_status) != 0))
-		return (0);
+		return (-1);
 
-	return (1);
-}
-
-void free_shell_variable(void *const data)
-{
-	shell_variable *v = data;
-
-	if (v)
-	{
-		v->name = _free(v->name);
-		v->value = _free(v->value);
-	}
+	return (0);
 }
 
 /**
  * interprate - execute command in tokens.
  * @tokens: list of tokens from input.
+ * @environ: pointer to an `environment_vars` struct.
  *
  * Return: 0 on success, -1 on error.
  */
-int interprate(queue *const tokens)
+int interprate(queue * const tokens, environment_vars * const environ)
 {
 	queue shell_vars = {0};
-	shell_variable *var_ptr = NULL;
 	char **argv = NULL;
-	int return_val = 0;
+	int ret_val = 0;
 
 	if (!tokens)
 		return (-1);
 
-	while (tokens->head && _strstr(((view_string *)tokens->head->data)->s, "=").s)
-	{
-		view_string *tok = dequeue(tokens);
-		shell_variable var = get_shell_variable(*tok);
-
-		string_delete(tok);
-		if (!var.name)
-		{
-			return_val = -1;
-			goto clean_exit;
-		}
-
-		enqueue(&shell_vars, &var, NULL);
-	}
-
+	get_shell_variables(&shell_vars, tokens);
 	argv = (char **)queue_to_array(tokens, string_to_cstr, free);
 	if (!argv)
 	{
-		return_val = -1;
+		ret_val = -1;
 		goto clean_exit;
 	}
 
-	var_ptr = dequeue(&shell_vars);
-	while (var_ptr)
+	if (export_shell_variables(&shell_vars, environ) < 0)
 	{
-		int setenv_ret = _setenv(*var_ptr);
-
-		free_shell_variable(var_ptr);
-		if (setenv_ret < 0)
-		{
-			return_val = -1;
-			goto clean_exit;
-		}
-
-		var_ptr = dequeue(&shell_vars);
+		ret_val = -1;
+		goto clean_exit;
 	}
 
-	if (exec_command(argv[0], argv, environ) == 0)
-		return_val = -1;
+	if (exec_command(argv[0], argv, environ->env) < 0)
+		ret_val = -1;
 
 clean_exit:
 	argv = delete_2D_array((void **)argv, tokens->length, free);
-	queue_clear(&shell_vars, free_shell_variable);
-	return (return_val);
+	queue_clear(&shell_vars, string_delete);
+	return (ret_val);
 }
