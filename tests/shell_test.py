@@ -4,7 +4,6 @@
 import atexit
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from enum import StrEnum
 import io
 import os
 from pathlib import Path
@@ -12,15 +11,8 @@ import subprocess
 import sys
 import tempfile
 
-
-class Colors(StrEnum):
-    """Terminal colour codes."""
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    BRIGHT_GREEN_TEXT = "\033[92m"
-    BRIGHT_WHITE_TEXT = "\033[97m"
-    CYAN_TEXT = "\033[36m"
-    YELLOW_TEXT = "\033[33m"
+from pretty_diff import pretty_unified_diff
+import terminal_styling as t_style
 
 
 @dataclass(slots=True)
@@ -33,7 +25,7 @@ class ShellTestResult:
     stderr: bytes
 
 
-TIMED_OUT = f"{Colors.BOLD}{Colors.YELLOW_TEXT}TIMED OUT{Colors.RESET}\n".encode()  # noqa: E501
+TIMED_OUT = f"{t_style.bold(t_style.yellow("TIMED OUT"))}\n".encode()
 
 
 class ShellTestCase:
@@ -45,8 +37,8 @@ class ShellTestCase:
 
     def __init__(
         self, method_name: str, test_shell: str,
-        control_shell: str = "sh", environment=os.environ,
-        check_asan: bool = True
+        control_shell="sh", environment=os.environ,
+        no_report=False, check_asan=True
     ):
         """Create class instance that uses given method when run.
 
@@ -57,7 +49,7 @@ class ShellTestCase:
             ValueError: if the instance does not have a method with the
                 specified name.
         """
-        self.test_method: Callable[[None], None]
+        self.test_method: Callable[[], None]
         try:
             self.test_method = getattr(self, method_name)
         except AttributeError as exp:
@@ -68,24 +60,42 @@ class ShellTestCase:
         self.test_shell = test_shell
         self.control_shell = control_shell
         self.environment: dict[str, str] = environment
-        self.asan_outfile = None
+        self.no_report = no_report
+        self.asan_logfile = None
         self.timed_out = False
-        self.tests_failed = False
-        if check_asan is True:
-            filename = (
+        self.test_failed = False
+        if no_report is False and check_asan is True:
+            self.asan_logfile = (
                 f"ASAN-{"-".join(self.test_method.__module__.split("."))}-"
                 f"{"-".join(self.test_method.__qualname__.split("."))}-"
             )
-            with tempfile.NamedTemporaryFile(
-                    prefix=filename, delete=False) as asan_outfile:
-                self.asan_outfile = asan_outfile.name
+            self.environment.update({
+                "ASAN_OPTIONS": (
+                    "detect_leaks=1"
+                    ":detect_stack_use_after_return=true"
+                    ":strict_string_checks=true"
+                    ":replace_str=true"
+                    f":log_path={self.asan_logfile}"
+                )
+            })
 
-            atexit.register(Path(self.asan_outfile).unlink, missing_ok=True)
-            self.environment["ASAN_OPTIONS"] = (
-                "detect_leaks=1"
-                ":detect_stack_use_after_return=true:strict_string_checks=true"
-                f":replace_str=true:log_path={self.asan_outfile}"
-            )
+    @property
+    def asan_logfile(self) -> str | None:
+        """Return name of the ASAN logfile."""
+        return self.__asan_logfile
+
+    @asan_logfile.setter
+    def asan_logfile(self, filename: str | None) -> None:
+        """Create the ASAN log file."""
+        if filename is None:
+            self.__asan_logfile = None
+            return
+
+        with tempfile.NamedTemporaryFile(
+                prefix=filename, delete=False) as asan_logfile:
+            self.__asan_logfile = asan_logfile.name
+
+        atexit.register(Path(self.__asan_logfile).unlink, missing_ok=True)
 
     @classmethod
     def class_setup(cls):
@@ -166,17 +176,17 @@ class ShellTestCase:
             res = self._run_shell(
                 *args, command=command, is_ctrl=False, timeout=timeout)
         except subprocess.TimeoutExpired:
-            self.tests_failed = True
+            self.test_failed = True
             self.timed_out = True
 
         if self.timed_out:
-            self.test_shell_result = ShellTestResult(
+            self.test_result = ShellTestResult(
                 command=command if command else b"", args=args,
                 return_status=-1, stdout=TIMED_OUT,
                 stderr=TIMED_OUT
             )
         else:
-            self.test_shell_result = ShellTestResult(
+            self.test_result = ShellTestResult(
                 command=command if command else b"", args=args,
                 return_status=res.returncode,
                 stdout=res.stdout, stderr=res.stderr
@@ -192,55 +202,56 @@ class ShellTestCase:
             res = self._run_shell(
                 *args, command=command, is_ctrl=True, timeout=timeout)
         except subprocess.TimeoutExpired:
-            self.tests_failed = True
+            self.test_failed = True
             self.timed_out = True
 
         if self.timed_out:
-            self.ctrl_shell_result = ShellTestResult(
+            self.ctrl_result = ShellTestResult(
                 command=command if command else b"", args=args,
                 return_status=-1, stdout=TIMED_OUT,
                 stderr=TIMED_OUT
             )
         else:
-            self.ctrl_shell_result = ShellTestResult(
+            self.ctrl_result = ShellTestResult(
                 command=command if command else b"", args=args,
                 return_status=res.returncode,
                 stdout=res.stdout, stderr=res.stderr
             )
 
-    def _report_test(self) -> str | None:
+    def _report_test(self) -> str:
         """Print out status of the test."""
         leaky = False
-        if self.asan_outfile is not None:
-            leaky = Path(self.asan_outfile).stat().st_size > 0
+        if self.asan_logfile is not None:
+            leaky = Path(self.asan_logfile).stat().st_size > 0
 
-        if not leaky and self.test_shell_result == self.ctrl_shell_result:
-            return None
+        if not leaky and self.test_result == self.ctrl_result:
+            return ""
 
-        self.tests_failed = True
+        self.test_failed = True
+        diff_stdout = pretty_unified_diff(
+            self.test_result.stdout.splitlines(keepends=True),
+            self.ctrl_result.stdout.splitlines(keepends=True),
+            fromfile="test_shell_result", tofile="ctrl_shell_result"
+        )
+        diff_stderr = pretty_unified_diff(
+            self.test_result.stderr.splitlines(keepends=True),
+            self.ctrl_result.stderr.splitlines(keepends=True),
+            fromfile="test_shell_result", tofile="ctrl_shell_result"
+        )
         report = "\n".join([
-            Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + "(command)" + Colors.RESET,  # noqa: E501
-            f"echo {self.test_shell_result.command.decode()} | {self.test_shell} {b" ".join(self.test_shell_result.args).decode().strip()}",  # noqa: E501,B950
-            Colors.BOLD + Colors.YELLOW_TEXT + "\n[GOT]:" + Colors.RESET,
-            Colors.CYAN_TEXT + "(status)" + Colors.RESET + f" {self.test_shell_result.return_status}",  # noqa: E501,B950
-            Colors.CYAN_TEXT + "(stdout)" + Colors.RESET,
-            f"{self.test_shell_result.stdout.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.test_shell_result.stdout.count(b"\n")})" + Colors.RESET,  # noqa: E501,B950
-            Colors.CYAN_TEXT + "(stderr)" + Colors.RESET,
-            f"{self.test_shell_result.stderr.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.test_shell_result.stderr.count(b"\n")})" + Colors.RESET,  # noqa: E501,B950
-            Colors.BOLD + Colors.YELLOW_TEXT + "\n[EXPECTED]:" + Colors.RESET,  # noqa: E501,B950
-            Colors.CYAN_TEXT + "(status)" + Colors.RESET + f" {self.ctrl_shell_result.return_status}",  # noqa: E501,B950
-            Colors.CYAN_TEXT + "(stdout)" + Colors.RESET,
-            f"{self.ctrl_shell_result.stdout.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.ctrl_shell_result.stdout.count(b"\n")})" + Colors.RESET,  # noqa: E501,B950
-            Colors.CYAN_TEXT + "(stderr)" + Colors.RESET,
-            f"{self.ctrl_shell_result.stderr.decode()}" + Colors.BOLD + Colors.BRIGHT_WHITE_TEXT + f"(Lines: {self.ctrl_shell_result.stderr.count(b"\n")})" + Colors.RESET + "\n"  # noqa: E501,B950
+            t_style.bold(t_style.blue("(command)")),
+            f"echo {self.test_result.command.decode()} | {self.test_shell} {b" ".join(self.test_result.args).decode().strip()}",  # noqa: E501,B950
+            f"{t_style.blue("(status)")} {self.test_shell}:{self.test_result.return_status} {self.control_shell}:{self.ctrl_result.return_status}",  # noqa: E501,B950
+            t_style.blue("(diff-stdout)"), diff_stdout.strip(),
+            t_style.blue("(diff-stderr)"), diff_stderr.strip()
         ])
-        if leaky and self.asan_outfile is not None:
-            with open(self.asan_outfile) as f:
+        if leaky and self.asan_logfile is not None:
+            with open(self.asan_logfile) as f:
                 report += "\n" + f.read()
 
         return report
 
-    def run(self):
+    def run(self) -> None:
         """Run the instance with the given method."""
         self.setup()
         try:
@@ -248,30 +259,47 @@ class ShellTestCase:
         finally:
             self.teardown()
 
-        testname = f"{self.test_method.__module__}.{self.test_method.__qualname__}: "  # noqa: E501,B950
-        report = self._report_test()
+        testname = f"{self.test_method.__qualname__}"
+        ok = t_style.bright_green("OK")
+        fail = t_style.bright_red("FAILED")
         doc = ""
-        if self.test_method.__doc__ and report is not None:
-            doc = self.test_method.__doc__ + "\n"
+        if self.test_method.__doc__ is not None:
+            doc = self.test_method.__doc__
 
-        if report is None:
-            report = Colors.BRIGHT_GREEN_TEXT + "OK." + Colors.RESET
+        report = self._report_test()
+        if self.test_failed:
+            print(f"{testname}: {fail} {doc}", file=sys.stderr)
 
-        print(testname + f"{doc}{report}", file=sys.stderr)
+            if self.no_report is False:
+                print(report, file=sys.stderr)
+
+            return
+
+        print(f"{testname}: {ok}.", file=sys.stderr)
 
 
 class ShellTestSuite:
     """Test Suite."""
 
     def __init__(self, suite: type[ShellTestCase],
-                 test_shell: str, control_shell: str):
+                 test_shell: str, control_shell: str,
+                 no_report=False, check_asan=True,
+                 fail_fast=True):
         """Initialise ShellTestSuite."""
         if not issubclass(suite, ShellTestCase):
             raise TypeError(f"suite must be a subclass of {ShellTestCase}")
 
+        self.fail_fast = fail_fast
         self.test_suite = suite
-        self.test_cases = [self.test_suite(case, test_shell, control_shell)
-                           for case in self._extract_test_cases()]
+        self.test_cases = [
+            self.test_suite(
+                case, test_shell, control_shell,
+                no_report=no_report, check_asan=check_asan
+            )
+            for case in self._extract_test_cases()
+        ]
+        self.total_tests = len(self.test_cases)
+        self.failed_tests = 0
 
     def _extract_test_cases(self) -> list[str]:
         """Extract test cases from a test suite."""
@@ -285,7 +313,8 @@ class ShellTestSuite:
 
             test_cases.append(attr_name)
 
-        return sorted(test_cases)
+        test_cases.sort()
+        return test_cases
 
     def run(self) -> None:
         """Run all tests in the suite."""
@@ -293,7 +322,9 @@ class ShellTestSuite:
         try:
             for test_case in self.test_cases:
                 test_case.run()
-                if test_case.tests_failed is True:
-                    break
+                if test_case.test_failed is True:
+                    self.failed_tests += 1
+                    if self.fail_fast is True:
+                        break
         finally:
             self.test_suite.class_teardown()

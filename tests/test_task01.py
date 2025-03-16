@@ -5,20 +5,8 @@ from glob import glob
 from pathlib import Path
 import shutil
 
-from ShellTest import ShellTestCase
-
-
-def cat_and_rm_files(dest: str, srcs: list[str]):
-    """Concatenate several files and delete them afterwards."""
-    if not len(srcs):
-        return
-
-    with open(dest, "w+b") as d_file:
-        for source_file in srcs:
-            with open(source_file, "rb") as s_file:
-                shutil.copyfileobj(s_file, d_file)
-
-            Path(source_file).unlink(missing_ok=True)
+from cat_rm import cat_rm
+from shell_test import ShellTestCase
 
 
 class TestTask01(ShellTestCase):
@@ -26,7 +14,7 @@ class TestTask01(ShellTestCase):
 
     def teardown_test_shell(self):
         """Clean up after test."""
-        cat_and_rm_files(self.asan_outfile, glob(f"{self.asan_outfile}.*"))
+        cat_rm(self.asan_logfile, glob(f"{self.asan_logfile}.*"))
 
     def test_bin_ls(self):
         """Execute `/bin/ls`."""
@@ -44,7 +32,7 @@ class TestTask01(ShellTestCase):
         """Execute `/bin/ls` surrounded by spaces 4 times."""
         command = b"/bin/ls\n     /bin/ls\n/bin/ls\n   /bin/ls     "
         self.run_ctrl_shell(command)
-        self.run_test_shell(command)
+        self.run_test_shell(b"/bin/ls\n     /bin/ls\n/bin/ls\n        ")
 
     def test_spaces_only(self):
         """Input only spaces."""
@@ -70,7 +58,7 @@ class TestTask01CopyFile(ShellTestCase):
 
     def teardown_test_shell(self):
         """Clean up after test."""
-        cat_and_rm_files(self.asan_outfile, glob(f"{self.asan_outfile}.*"))
+        cat_rm(self.asan_logfile, glob(f"{self.asan_logfile}.*"))
 
     def setup(self) -> None:
         """Copy ls program into current directory."""
